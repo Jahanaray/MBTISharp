@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { Link } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
+import { isContentSafe, getBlockedWordsInContent } from '../utils/safetyFilter'
 
 type Step = 'phone' | 'otp' | 'success'
 
@@ -18,6 +19,9 @@ function Login() {
   const [allowMeetInPerson, setAllowMeetInPerson] = useState(false)
   const [allowCallVerification, setAllowCallVerification] = useState(false)
   const [interestedMBTIs, setInterestedMBTIs] = useState<string[]>([])
+  const [fullNameError, setFullNameError] = useState('')
+  const [cityError, setCityError] = useState('')
+  const [contentError, setContentError] = useState('')
   const [otp, setOtp] = useState('')
 
   const mbtiTypes = ['INTJ', 'INTP', 'ENTJ', 'ENTP', 'INFJ', 'INFP', 'ENFJ', 'ENFP', 'ISTJ', 'ISFJ', 'ESFJ', 'ESTJ', 'ISTP', 'ISFP', 'ESFP', 'ESTP']
@@ -54,6 +58,17 @@ function Login() {
     e.preventDefault()
     if (!phoneNumber.trim()) {
       setError(t('auth.enterPhone', 'Please enter a phone number.'))
+      return
+    }
+    // Client-side safety filter validation (T104-T105)
+    setContentError('')
+    if (fullName.trim() && !isContentSafe(fullName.trim())) {
+      const blocked = getBlockedWordsInContent(fullName.trim())
+      setContentError(t('auth.contentUnsafe', 'Your name contains inappropriate language.'))
+      return
+    }
+    if (city.trim() && !isContentSafe(city.trim())) {
+      setContentError(t('auth.contentUnsafe', 'Your city name contains inappropriate language.'))
       return
     }
     setLoading(true)
@@ -294,6 +309,10 @@ function Login() {
                     ))}
                   </div>
                 </div>
+
+                {contentError && (
+                  <p className="text-sm text-orange-600 bg-orange-50 p-3 rounded-lg">{contentError}</p>
+                )}
 
                 {error && (
                   <p className="text-sm text-red-600 bg-red-50 p-3 rounded-lg">{error}</p>

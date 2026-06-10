@@ -1,19 +1,22 @@
-# Current Task: T096-T097
+# Current Task: T104-T105 + Translation Completion
 
 ## Goal
-Mark registration translation tasks as DONE (translations already added in T087-T095)
+Add missing auth translations and client-side safety filter to registration form.
 
 ## Files Affected
-- docs/TASKS.md (mark T096-T097 DONE)
-- docs/CURRENT_TASK.md
+- frontend/src/i18n/locales/en/common.json (added missing auth keys)
+- frontend/src/i18n/locales/fa/common.json (added missing auth keys)
+- frontend/src/pages/Login.tsx (added safety filter validation)
+- docs/TASKS.md (marked T104-T105 DONE)
 
 ## Dependencies
-- T087-T095 (registration form fields and translations)
+- T096-T097 (registration translations)
+- T103 (backend safety filter service)
 
 ## Acceptance Criteria
-- All registration field translations exist in EN/FA JSON files
+- All auth translation keys used in Login.tsx exist in EN/FA JSON files
+- Client-side safety filter validates registration inputs
 - TASKS.md updated
 
 ## Definition of Done
 - TASKS.md updated
-- Git commit created
