@@ -119,6 +119,7 @@
     "shareLocation": "اشتراک‌گذاری موقعیت",
     "gettingLocation": "در حال دریافت موقعیت...",
     "locationCaptured": "دریافت شد ({lat}, {lng})",
+    "allowCallVerification": "اجازه تماس تاییدیه",
     "allowMeetInPerson": "اجازه ملاقات حضوری",
     "allowChat": "اجازه چت با جفت‌ها",
     "acceptTerms": "با شرایط زیر موافقم",

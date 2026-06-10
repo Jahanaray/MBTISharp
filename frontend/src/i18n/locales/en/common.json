@@ -119,6 +119,7 @@
     "shareLocation": "Share Location",
     "gettingLocation": "Getting location...",
     "locationCaptured": "Captured ({lat}, {lng})",
+    "allowCallVerification": "Allow call verification",
     "allowMeetInPerson": "Allow meet in person",
     "allowChat": "Allow chat with matches",
     "acceptTerms": "I agree to the",

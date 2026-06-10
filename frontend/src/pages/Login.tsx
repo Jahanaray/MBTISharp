@@ -16,6 +16,7 @@ function Login() {
   const [termsAccepted, setTermsAccepted] = useState(false)
   const [allowChat, setAllowChat] = useState(true)
   const [allowMeetInPerson, setAllowMeetInPerson] = useState(false)
+  const [allowCallVerification, setAllowCallVerification] = useState(false)
   const [otp, setOtp] = useState('')
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
@@ -58,12 +59,13 @@ function Login() {
             formData.append('termsAccepted', termsAccepted.toString())
             formData.append('allowChat', allowChat.toString())
             formData.append('allowMeetInPerson', allowMeetInPerson.toString())
+            formData.append('allowCallVerification', allowCallVerification.toString())
             if (latitude) formData.append('latitude', latitude.toString())
             if (longitude) formData.append('longitude', longitude.toString())
             if (photoFile) formData.append('photo', photoFile)
             return formData
           })()
-        : JSON.stringify({ phoneNumber, fullName, city, latitude, longitude, termsAccepted, allowChat, allowMeetInPerson })
+        : JSON.stringify({ phoneNumber, fullName, city, latitude, longitude, termsAccepted, allowChat, allowMeetInPerson, allowCallVerification })
       
       const headers: HeadersInit = photoFile
         ? {}
@@ -247,6 +249,19 @@ function Login() {
                   />
                   <label htmlFor="allowMeetInPerson" className="ml-2 text-sm text-gray-600">
                     {t('auth.allowMeetInPerson', 'Allow meet in person')}
+                  </label>
+                </div>
+
+                <div className="flex items-start">
+                  <input
+                    id="allowCallVerification"
+                    type="checkbox"
+                    checked={allowCallVerification}
+                    onChange={(e) => setAllowCallVerification(e.target.checked)}
+                    className="mt-1 w-4 h-4 text-primary border-gray-300 rounded focus:ring-primary"
+                  />
+                  <label htmlFor="allowCallVerification" className="ml-2 text-sm text-gray-600">
+                    {t('auth.allowCallVerification', 'Allow call verification')}
                   </label>
                 </div>
 
