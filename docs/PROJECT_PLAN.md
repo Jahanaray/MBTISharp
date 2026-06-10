@@ -1,0 +1,112 @@
+# MBTI Match Project Plan
+
+## Product Vision
+MBTI Match is a mobile‑first progressive web application that connects people based on personality compatibility. Users take a short 15‑question MBTI‑style test, receive their type, register with a phone number, and are randomly matched to another user for real‑time chat. The goal is to facilitate meaningful connections and eventually provide AI‑driven compatibility recommendations.
+
+## User Journey
+1. **Landing** – Users land on the PWA home page and see a brief introduction.
+2. **Test** – A 15‑question MBTI‑style quiz appears; answers are stored locally until submission.
+3. **Result** – After submitting, the user sees their personality type and a short description.
+4. **Registration** – The app prompts for phone number, email and password entry; the password will be used for authentication until an OTP service is integrated. Phone number verification via SMS is optional.
+5. **Matching** – The system randomly pairs the user with another available user.
+6. **Chat** – Users can exchange messages in real‑time via WebSocket.
+7. **Future Enhancements** – Compatibility scoring, AI recommendations, and advanced matching algorithms will be added later.
+
+## MVP Scope
+- 15‑question MBTI quiz (client‑side validation).
+- Personality result display.
+- Phone number and password registration (OTP optional).
+- Random user matching algorithm.
+- Real‑time chat using WebSocket.
+- Mobile‑first responsive UI with Tailwind & shadcn/ui.
+- PWA support (service worker, manifest). 
+
+## Future Roadmap
+| Phase | Milestone |
+|-------|-----------|
+| 2 | Implement deterministic matching based on personality scores. |
+| 3 | Add AI‑driven compatibility recommendations and analytics dashboard. |
+| 4 | Scale infrastructure to support millions of concurrent users (Kubernetes, CDN). |
+
+## Internationalization & Content Strategy
+
+The application will support Persian and English languages using a standard i18n approach. All static text, labels, placeholders, and error messages will be stored in JSON resource files per language. The UI will detect the browser locale or allow manual switch via a language selector.
+
+Content for each page (Home, Quiz, Result, Chat, Dashboard) will be written in both languages, ensuring cultural relevance and proper RTL support for Persian.
+
+## Technical Architecture
+```
+┌───────────────────────┐
+│   Frontend (React TS) │
+├─────────────┬─────────┤
+│ API Client │ PWA Service Worker │
+├─────────────┴─────────┤
+│  Backend (ASP.NET Core 9) │
+├───────────────────────────┤
+│   PostgreSQL Database     │
+└───────────────────────────┘
+```
+- **Backend**: ASP.NET Core 9 Web API, EF Core for data access, SignalR for real‑time chat.
+- **Frontend**: Vite + React TS, Tailwind CSS, shadcn/ui components, PWA support via Workbox.
+- **Auth**: JWT tokens issued after phone verification.
+- **Chat**: SignalR hub with message persistence in PostgreSQL.
+
+## Folder Structure
+```
+├── backend/          # ASP.NET Core project
+│   ├── Controllers/  # API endpoints
+│   ├── Models/       # EF entities
+│   ├── Services/     # Business logic
+│   └── Program.cs    # Host configuration
+├── frontend/         # React Vite project
+│   ├── src/
+│   │   ├── components/
+│   │   ├── pages/
+│   │   ├── hooks/
+│   │   └── api/
+│   ├── public/
+│   └── vite.config.ts
+├── docs/             # Project documentation (this file)
+└── scripts/          # CI/CD, deployment helpers
+```
+
+## Database Design
+| Table | Columns | Notes |
+|-------|---------|-------|
+| Users | Id, PhoneNumber, PhoneVerified, MBTIType, CreatedAt | Primary key UUID |
+| Answers | Id, UserId, QuestionIndex, AnswerValue | Stores quiz answers |
+| Matches | Id, UserAId, UserBId, MatchedAt | Random pairing record |
+| Messages | Id, MatchId, SenderId, Content, SentAt | Chat history |
+
+## API Design (REST + SignalR)
+- `POST /api/quiz` – Submit answers.
+- `GET /api/result/{userId}` – Retrieve personality result.
+- `POST /api/auth/register` – Register phone number.
+- `POST /api/auth/verify` – Verify OTP.
+- `GET /api/match/me` – Get current match.
+- `GET /api/chat/history` – Get chat history for a match.
+- **SignalR Hub**: `/chatHub` – Send/receive messages in real‑time.
+
+## Frontend Architecture
+- **Routing**: React Router with protected routes after authentication.
+- **State Management**: React Query for server state, Context API for auth token.
+- **Component Hierarchy**:
+  - `App` → `Layout` → `Pages` (Home, Quiz, Result, Chat).
+- **PWA**: Service worker generated by Vite + Workbox; manifest includes icons and theme color.
+
+## Deployment Strategy
+1. Dockerize backend (`Dockerfile`) and frontend (`nginx` image). 
+2. Push images to Azure Container Registry or GitHub Packages.
+3. Deploy via Azure App Service (Linux) with autoscale based on CPU usage.
+4. Use GitHub Actions for CI: lint, test, build, push.
+5. Enable HTTPS and HSTS; use Azure Front Door for global CDN.
+
+## UI/UX Principles
+- **Mobile‑first**: Base styles on small screens, scale up with media queries.
+- **Accessibility**: WCAG 2.1 AA compliance, semantic HTML, ARIA labels.
+- **Minimalistic Design**: Clean typography, ample whitespace, consistent color palette (soft blues & neutrals).
+- **Dark Mode**: Auto‑detect system preference; toggle available.
+- **Feedback**: Toast notifications for actions, loading spinners during network calls.
+
+---
+*Prepared by the Lead Architect – MBTI Match Team*
