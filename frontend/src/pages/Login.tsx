@@ -11,9 +11,31 @@ function Login() {
   const [phoneNumber, setPhoneNumber] = useState('')
   const [city, setCity] = useState('')
   const [photoFile, setPhotoFile] = useState<File | null>(null)
+  const [latitude, setLatitude] = useState<number | undefined>()
+  const [longitude, setLongitude] = useState<number | undefined>()
   const [otp, setOtp] = useState('')
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
+
+  const handleGetLocation = () => {
+    if (!navigator.geolocation) {
+      setError(t('auth.geolocationNotSupported', 'Geolocation is not supported by your browser.'))
+      return
+    }
+    setLoading(true)
+    navigator.geolocation.getCurrentPosition(
+      (position) => {
+        setLatitude(position.coords.latitude)
+        setLongitude(position.coords.longitude)
+        setError('')
+        setLoading(false)
+      },
+      () => {
+        setError(t('auth.locationDenied', 'Location access was denied. Please enable it in settings.'))
+        setLoading(false)
+      }
+    )
+  }
 
   const handleSendOtp = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -30,10 +52,12 @@ function Login() {
             formData.append('phoneNumber', phoneNumber)
             formData.append('fullName', fullName)
             formData.append('city', city)
+            if (latitude) formData.append('latitude', latitude.toString())
+            if (longitude) formData.append('longitude', longitude.toString())
             if (photoFile) formData.append('photo', photoFile)
             return formData
           })()
-        : JSON.stringify({ phoneNumber, fullName, city })
+        : JSON.stringify({ phoneNumber, fullName, city, latitude, longitude })
       
       const headers: HeadersInit = photoFile
         ? {}
@@ -142,6 +166,24 @@ function Login() {
                     }}
                     className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent outline-none file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-semibold file:bg-primary file:text-white hover:file:bg-blue-600"
                   />
+                </div>
+
+                <div className="flex items-center gap-2">
+                  <span className="text-sm text-gray-600">{t('auth.location', 'Location')}</span>
+                  {latitude && longitude ? (
+                    <span className="text-sm text-green-600 font-medium">
+                      {t('auth.locationCaptured', 'Captured ({lat}, {lng})', { lat: latitude.toFixed(4), lng: longitude.toFixed(4) })}
+                    </span>
+                  ) : (
+                    <button
+                      type="button"
+                      onClick={handleGetLocation}
+                      disabled={loading}
+                      className="text-sm px-3 py-1 bg-secondary text-white rounded-lg hover:bg-purple-600 transition-colors disabled:opacity-50"
+                    >
+                      {loading ? t('auth.gettingLocation', 'Getting location...') : t('auth.shareLocation', 'Share Location')}
+                    </button>
+                  )}
                 </div>
 
                 <div>
