@@ -15,6 +15,7 @@ function Login() {
   const [longitude, setLongitude] = useState<number | undefined>()
   const [termsAccepted, setTermsAccepted] = useState(false)
   const [allowChat, setAllowChat] = useState(true)
+  const [allowMeetInPerson, setAllowMeetInPerson] = useState(false)
   const [otp, setOtp] = useState('')
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
@@ -56,12 +57,13 @@ function Login() {
             formData.append('city', city)
             formData.append('termsAccepted', termsAccepted.toString())
             formData.append('allowChat', allowChat.toString())
+            formData.append('allowMeetInPerson', allowMeetInPerson.toString())
             if (latitude) formData.append('latitude', latitude.toString())
             if (longitude) formData.append('longitude', longitude.toString())
             if (photoFile) formData.append('photo', photoFile)
             return formData
           })()
-        : JSON.stringify({ phoneNumber, fullName, city, latitude, longitude, termsAccepted, allowChat })
+        : JSON.stringify({ phoneNumber, fullName, city, latitude, longitude, termsAccepted, allowChat, allowMeetInPerson })
       
       const headers: HeadersInit = photoFile
         ? {}
@@ -232,6 +234,19 @@ function Login() {
                   />
                   <label htmlFor="allowChat" className="ml-2 text-sm text-gray-600">
                     {t('auth.allowChat', 'Allow chat with matches')}
+                  </label>
+                </div>
+
+                <div className="flex items-start">
+                  <input
+                    id="allowMeetInPerson"
+                    type="checkbox"
+                    checked={allowMeetInPerson}
+                    onChange={(e) => setAllowMeetInPerson(e.target.checked)}
+                    className="mt-1 w-4 h-4 text-primary border-gray-300 rounded focus:ring-primary"
+                  />
+                  <label htmlFor="allowMeetInPerson" className="ml-2 text-sm text-gray-600">
+                    {t('auth.allowMeetInPerson', 'Allow meet in person')}
                   </label>
                 </div>
 

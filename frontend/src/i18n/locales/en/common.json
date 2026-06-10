@@ -119,6 +119,7 @@
     "shareLocation": "Share Location",
     "gettingLocation": "Getting location...",
     "locationCaptured": "Captured ({lat}, {lng})",
+    "allowMeetInPerson": "Allow meet in person",
     "allowChat": "Allow chat with matches",
     "acceptTerms": "I agree to the",
     "geolocationNotSupported": "Geolocation is not supported by your browser.",
