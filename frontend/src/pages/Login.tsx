@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import { Link } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
-import { isContentSafe, getBlockedWordsInContent } from '../utils/safetyFilter'
+import { isContentSafe } from '../utils/safetyFilter'
 
 type Step = 'phone' | 'otp' | 'success'
 
@@ -19,8 +19,6 @@ function Login() {
   const [allowMeetInPerson, setAllowMeetInPerson] = useState(false)
   const [allowCallVerification, setAllowCallVerification] = useState(false)
   const [interestedMBTIs, setInterestedMBTIs] = useState<string[]>([])
-  const [fullNameError, setFullNameError] = useState('')
-  const [cityError, setCityError] = useState('')
   const [contentError, setContentError] = useState('')
   const [otp, setOtp] = useState('')
 
@@ -63,7 +61,6 @@ function Login() {
     // Client-side safety filter validation (T104-T105)
     setContentError('')
     if (fullName.trim() && !isContentSafe(fullName.trim())) {
-      const blocked = getBlockedWordsInContent(fullName.trim())
       setContentError(t('auth.contentUnsafe', 'Your name contains inappropriate language.'))
       return
     }
