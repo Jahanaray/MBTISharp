@@ -13,6 +13,7 @@ function Login() {
   const [photoFile, setPhotoFile] = useState<File | null>(null)
   const [latitude, setLatitude] = useState<number | undefined>()
   const [longitude, setLongitude] = useState<number | undefined>()
+  const [termsAccepted, setTermsAccepted] = useState(false)
   const [otp, setOtp] = useState('')
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
@@ -52,12 +53,13 @@ function Login() {
             formData.append('phoneNumber', phoneNumber)
             formData.append('fullName', fullName)
             formData.append('city', city)
+            formData.append('termsAccepted', termsAccepted.toString())
             if (latitude) formData.append('latitude', latitude.toString())
             if (longitude) formData.append('longitude', longitude.toString())
             if (photoFile) formData.append('photo', photoFile)
             return formData
           })()
-        : JSON.stringify({ phoneNumber, fullName, city, latitude, longitude })
+        : JSON.stringify({ phoneNumber, fullName, city, latitude, longitude, termsAccepted })
       
       const headers: HeadersInit = photoFile
         ? {}
@@ -199,6 +201,23 @@ function Login() {
                     required
                     className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent outline-none"
                   />
+                </div>
+
+                <div className="flex items-start">
+                  <input
+                    id="terms"
+                    type="checkbox"
+                    checked={termsAccepted}
+                    onChange={(e) => setTermsAccepted(e.target.checked)}
+                    required
+                    className="mt-1 w-4 h-4 text-primary border-gray-300 rounded focus:ring-primary"
+                  />
+                  <label htmlFor="terms" className="ml-2 text-sm text-gray-600">
+                    {t('auth.acceptTerms', 'I agree to the')}{' '}
+                    <a href="/legal" className="text-primary hover:underline" target="_blank">
+                      {t('auth.termsOfService', 'Terms of Service')}
+                    </a>
+                  </label>
                 </div>
 
                 {error && (

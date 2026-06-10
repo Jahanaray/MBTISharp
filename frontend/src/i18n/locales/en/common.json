@@ -119,6 +119,7 @@
     "shareLocation": "Share Location",
     "gettingLocation": "Getting location...",
     "locationCaptured": "Captured ({lat}, {lng})",
+    "acceptTerms": "I agree to the",
     "geolocationNotSupported": "Geolocation is not supported by your browser.",
     "locationDenied": "Location access was denied. Please enable it in settings.",
     "profilePhoto": "Profile Photo",
