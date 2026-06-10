@@ -115,6 +115,7 @@
     "email": "ایمیل",
     "password": "رمز عبور",
     "fullName": "نام کامل",
+    "profilePhoto": "عکس پروفایل",
     "city": "شهر",
     "phoneNumber": "شماره تلفن",
     "phoneVerified": "تلفن تأیید شده",

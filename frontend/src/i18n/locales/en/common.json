@@ -115,6 +115,7 @@
     "email": "Email",
     "password": "Password",
     "fullName": "Full Name",
+    "profilePhoto": "Profile Photo",
     "city": "City",
     "phoneNumber": "Phone Number",
     "phoneVerified": "Phone Verified",

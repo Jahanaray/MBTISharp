@@ -10,6 +10,7 @@ function Login() {
   const [fullName, setFullName] = useState('')
   const [phoneNumber, setPhoneNumber] = useState('')
   const [city, setCity] = useState('')
+  const [photoFile, setPhotoFile] = useState<File | null>(null)
   const [otp, setOtp] = useState('')
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
@@ -23,10 +24,25 @@ function Login() {
     setLoading(true)
     setError('')
     try {
+      const body: BodyInit | null = photoFile
+        ? (() => {
+            const formData = new FormData()
+            formData.append('phoneNumber', phoneNumber)
+            formData.append('fullName', fullName)
+            formData.append('city', city)
+            if (photoFile) formData.append('photo', photoFile)
+            return formData
+          })()
+        : JSON.stringify({ phoneNumber, fullName, city })
+      
+      const headers: HeadersInit = photoFile
+        ? {}
+        : { 'Content-Type': 'application/json' }
+      
       const response = await fetch('/api/auth/register', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ phoneNumber, fullName, city })
+        headers,
+        body
       })
       if (response.ok) {
         setStep('otp')
@@ -109,6 +125,22 @@ function Login() {
                     onChange={(e) => setCity(e.target.value)}
                     placeholder={t('auth.enterCity', 'Enter your city')}
                     className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent outline-none"
+                  />
+                </div>
+
+                <div>
+                  <label htmlFor="photo" className="block text-sm font-medium text-gray-700 mb-1">
+                    {t('auth.profilePhoto', 'Profile Photo')}
+                  </label>
+                  <input
+                    id="photo"
+                    type="file"
+                    accept="image/*"
+                    onChange={(e) => {
+                      const file = e.target.files?.[0]
+                      if (file) setPhotoFile(file)
+                    }}
+                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent outline-none file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-semibold file:bg-primary file:text-white hover:file:bg-blue-600"
                   />
                 </div>
 
