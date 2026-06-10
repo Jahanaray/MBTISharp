@@ -235,9 +235,9 @@
 ### Documentation Updates (T136-T138)
 | ID | Goal | Dependencies | Status |
 |----|------|--------------|--------|
-| T136 | Update PROJECT_PLAN.md with new features | - | PENDING |
-| T137 | Update PROJECT_STATUS.md with current progress | T136 | PENDING |
-| T138 | Update AI_CONTEXT.md with latest decisions | T137 | PENDING |
+| T136 | Update PROJECT_PLAN.md with new features | - | DONE |
+| T137 | Update PROJECT_STATUS.md with current progress | T136 | DONE |
+| T138 | Update AI_CONTEXT.md with latest decisions | T137 | DONE |
 
 ## Phase 4: Post-MVP Future Features
 | ID | Goal | Dependencies |
