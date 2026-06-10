@@ -17,7 +17,16 @@ function Login() {
   const [allowChat, setAllowChat] = useState(true)
   const [allowMeetInPerson, setAllowMeetInPerson] = useState(false)
   const [allowCallVerification, setAllowCallVerification] = useState(false)
+  const [interestedMBTIs, setInterestedMBTIs] = useState<string[]>([])
   const [otp, setOtp] = useState('')
+
+  const mbtiTypes = ['INTJ', 'INTP', 'ENTJ', 'ENTP', 'INFJ', 'INFP', 'ENFJ', 'ENFP', 'ISTJ', 'ISFJ', 'ESFJ', 'ESTJ', 'ISTP', 'ISFP', 'ESFP', 'ESTP']
+
+  const toggleMBTI = (type: string) => {
+    setInterestedMBTIs(prev =>
+      prev.includes(type) ? prev.filter(t => t !== type) : [...prev, type]
+    )
+  }
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
 
@@ -60,12 +69,13 @@ function Login() {
             formData.append('allowChat', allowChat.toString())
             formData.append('allowMeetInPerson', allowMeetInPerson.toString())
             formData.append('allowCallVerification', allowCallVerification.toString())
+            if (interestedMBTIs.length) formData.append('interestedMBTIs', interestedMBTIs.join(','))
             if (latitude) formData.append('latitude', latitude.toString())
             if (longitude) formData.append('longitude', longitude.toString())
             if (photoFile) formData.append('photo', photoFile)
             return formData
           })()
-        : JSON.stringify({ phoneNumber, fullName, city, latitude, longitude, termsAccepted, allowChat, allowMeetInPerson, allowCallVerification })
+        : JSON.stringify({ phoneNumber, fullName, city, latitude, longitude, termsAccepted, allowChat, allowMeetInPerson, allowCallVerification, interestedMBTIs: interestedMBTIs.join(',') })
       
       const headers: HeadersInit = photoFile
         ? {}
@@ -263,6 +273,26 @@ function Login() {
                   <label htmlFor="allowCallVerification" className="ml-2 text-sm text-gray-600">
                     {t('auth.allowCallVerification', 'Allow call verification')}
                   </label>
+                </div>
+
+                <div>
+                  <p className="text-sm font-medium text-gray-700 mb-2">{t('auth.interestedTypes', 'Interested MBTI Types')}</p>
+                  <div className="grid grid-cols-4 gap-2">
+                    {mbtiTypes.map(type => (
+                      <button
+                        key={type}
+                        type="button"
+                        onClick={() => toggleMBTI(type)}
+                        className={`py-2 px-3 text-xs font-semibold rounded-lg border transition-colors ${
+                          interestedMBTIs.includes(type)
+                            ? 'bg-primary text-white border-primary'
+                            : 'border-gray-300 text-gray-600 hover:border-primary'
+                        }`}
+                      >
+                        {type}
+                      </button>
+                    ))}
+                  </div>
                 </div>
 
                 {error && (

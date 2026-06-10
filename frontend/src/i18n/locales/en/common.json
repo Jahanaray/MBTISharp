@@ -119,6 +119,7 @@
     "shareLocation": "Share Location",
     "gettingLocation": "Getting location...",
     "locationCaptured": "Captured ({lat}, {lng})",
+    "interestedTypes": "Interested MBTI Types",
     "allowCallVerification": "Allow call verification",
     "allowMeetInPerson": "Allow meet in person",
     "allowChat": "Allow chat with matches",
