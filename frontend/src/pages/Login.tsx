@@ -9,6 +9,7 @@ function Login() {
   const [step, setStep] = useState<Step>('phone')
   const [fullName, setFullName] = useState('')
   const [phoneNumber, setPhoneNumber] = useState('')
+  const [city, setCity] = useState('')
   const [otp, setOtp] = useState('')
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
@@ -25,7 +26,7 @@ function Login() {
       const response = await fetch('/api/auth/register', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ phoneNumber, fullName })
+        body: JSON.stringify({ phoneNumber, fullName, city })
       })
       if (response.ok) {
         setStep('otp')
@@ -93,6 +94,20 @@ function Login() {
                     onChange={(e) => setFullName(e.target.value)}
                     placeholder={t('auth.enterFullName', 'Enter your full name')}
                     required
+                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent outline-none"
+                  />
+                </div>
+
+                <div>
+                  <label htmlFor="city" className="block text-sm font-medium text-gray-700 mb-1">
+                    {t('auth.city', 'City')}
+                  </label>
+                  <input
+                    id="city"
+                    type="text"
+                    value={city}
+                    onChange={(e) => setCity(e.target.value)}
+                    placeholder={t('auth.enterCity', 'Enter your city')}
                     className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent outline-none"
                   />
                 </div>
