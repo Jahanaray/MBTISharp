@@ -177,12 +177,12 @@
 ### Backend: Safety Filter Service (T098-T103)
 | ID | Goal | Dependencies | Status |
 |----|------|--------------|--------|
-| T098 | Create SafetyFilterService interface | - | PENDING |
-| T099 | Implement English profanity word list | T098 | PENDING |
-| T100 | Implement Persian profanity word list | T098 | PENDING |
-| T101 | Create filter method for text content | T099-T100 | PENDING |
-| T102 | Integrate safety filter into AuthController | T101 | PENDING |
-| T103 | Integrate safety filter into ChatController | T101 | PENDING |
+| T098 | Create SafetyFilterService interface | - | DONE |
+| T099 | Implement English profanity word list | T098 | DONE |
+| T100 | Implement Persian profanity word list | T098 | DONE |
+| T101 | Create filter method for text content | T099-T100 | DONE |
+| T102 | Integrate safety filter into AuthController | T101 | DONE |
+| T103 | Integrate safety filter into ChatController | T101 | DONE |
 
 ### Frontend: Safety Filter Component (T104-T106)
 | ID | Goal | Dependencies | Status |
