@@ -189,7 +189,7 @@
 |----|------|--------------|--------|
 | T104 | Create client-side content validation utility | - | DONE |
 | T105 | Add real-time input validation to registration form | T104 | DONE |
-| T106 | Add real-time message validation to chat page | T104 | PENDING |
+| T106 | Add real-time message validation to chat page | T104 | DONE |
 
 ### Content: Funny MBTI Descriptions (T107-T122)
 | ID | Goal | Dependencies | Status |

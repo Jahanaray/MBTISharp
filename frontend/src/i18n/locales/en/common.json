@@ -193,7 +193,8 @@
     "demoHi": "Hi there! How are you?",
     "demoHello": "Hello! I'm doing great, thanks for asking!",
     "typing": "typing...",
-    "you": "You"
+    "you": "You",
+    "inappropriateContent": "Message contains inappropriate language."
   },
   "common": {
     "loading": "Loading...",

@@ -2,6 +2,7 @@ import { useState, useEffect, useRef } from 'react'
 import { HubConnection, HubConnectionState, HubConnectionBuilder } from '@microsoft/signalr'
 import { HttpTransportType } from '@microsoft/signalr'
 import { useTranslation } from 'react-i18next'
+import { isContentSafe } from '../utils/safetyFilter'
 
 interface ChatMessage {
   id: string
@@ -16,6 +17,7 @@ function Chat() {
   const [matchId, setMatchId] = useState<string>('')
   const [messages, setMessages] = useState<ChatMessage[]>([])
   const [input, setInput] = useState('')
+  const [contentError, setContentError] = useState('')
   const [connectionState, setConnectionState] = useState<string>('disconnected')
   const [loading, setLoading] = useState(true)
   const messagesEndRef = useRef<HTMLDivElement>(null)
@@ -107,6 +109,13 @@ function Chat() {
   const handleSend = async (e: React.FormEvent) => {
     e.preventDefault()
     if (!input.trim() || !matchId) return
+
+    // Client-side safety filter validation (T106)
+    setContentError('')
+    if (!isContentSafe(input.trim())) {
+      setContentError(t('chat.inappropriateContent', 'Message contains inappropriate language.'))
+      return
+    }
 
     const message: ChatMessage = {
       id: crypto.randomUUID(),
@@ -218,7 +227,7 @@ function Chat() {
           <input
             type="text"
             value={input}
-            onChange={(e) => setInput(e.target.value)}
+            onChange={(e) => { setInput(e.target.value); setContentError('') }}
             placeholder={t('chat.placeholder', 'Type a message...')}
             className="flex-1 px-4 py-2 border border-gray-300 rounded-full focus:ring-2 focus:ring-primary focus:border-transparent outline-none"
           />
@@ -230,6 +239,9 @@ function Chat() {
             {t('chat.send', 'Send')}
           </button>
         </form>
+        {contentError && (
+          <p className="max-w-2xl mx-auto mt-2 text-sm text-orange-600 bg-orange-50 px-4 py-2 rounded-lg">{contentError}</p>
+        )}
       </div>
     </div>
   )
