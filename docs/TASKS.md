@@ -224,10 +224,10 @@
 ### Testing: Unit Tests (T129-T135)
 | ID | Goal | Dependencies | Status |
 |----|------|--------------|--------|
-| T129 | Create backend test project structure | - | PENDING |
-| T130 | Write AuthController registration tests | T129 | PENDING |
-| T131 | Write SafetyFilterService tests | T129 | PENDING |
-| T132 | Write password hashing tests | T130 | PENDING |
+| T129 | Create backend test project structure | - | DONE |
+| T130 | Write AuthController registration tests | T129 | DONE |
+| T131 | Write SafetyFilterService tests | T129 | DONE |
+| T132 | Write password hashing tests | T130 | DONE |
 | T133 | Create frontend test setup | - | PENDING |
 | T134 | Write registration form validation tests | T133 | PENDING |
 | T135 | Write i18n translation verification tests | T133 | PENDING |
