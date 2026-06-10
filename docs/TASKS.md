@@ -214,12 +214,12 @@
 ### Content: Legal Agreement Page (T123-T128)
 | ID | Goal | Dependencies | Status |
 |----|------|--------------|--------|
-| T123 | Create Legal.tsx page component | - | PENDING |
-| T124 | Add /legal route to router | T123 | PENDING |
-| T125 | Write Terms of Service content (EN/FA) | - | PENDING |
-| T126 | Write Privacy Policy content (EN/FA) | T125 | PENDING |
-| T127 | Write Cookie Policy content (EN/FA) | T126 | PENDING |
-| T128 | Update Footer with legal page link | T123 | PENDING |
+| T123 | Create Legal.tsx page component | - | DONE |
+| T124 | Add /legal route to router | T123 | DONE |
+| T125 | Write Terms of Service content (EN/FA) | - | DONE |
+| T126 | Write Privacy Policy content (EN/FA) | T125 | DONE |
+| T127 | Write Cookie Policy content (EN/FA) | T126 | DONE |
+| T128 | Update Footer with legal page link | T123 | DONE |
 
 ### Testing: Unit Tests (T129-T135)
 | ID | Goal | Dependencies | Status |

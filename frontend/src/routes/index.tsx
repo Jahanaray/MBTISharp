@@ -7,6 +7,7 @@ import Login from '../pages/Login'
 import Dashboard from '../pages/Dashboard'
 import Chat from '../pages/Chat'
 import Result from '../pages/Result'
+import Legal from '../pages/Legal'
 
 function AppRoutes() {
   return (
@@ -17,6 +18,7 @@ function AppRoutes() {
         <Route path="/quiz" element={<Quiz />} />
         <Route path="/login" element={<Login />} />
         <Route path="/result" element={<Result />} />
+        <Route path="/legal" element={<Legal />} />
       </Route>
 
       {/* Protected Routes */}
