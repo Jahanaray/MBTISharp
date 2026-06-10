@@ -1,21 +1,23 @@
-# Current Task: T063
+# Current Task: T087
 
 ## Goal
-Test Persian text rendering and alignment in both RTL and LTR modes
+Add full name input field to registration form
 
 ## Files Affected
-- No code changes (testing task)
+- frontend/src/pages/Login.tsx (registration form)
+- frontend/src/i18n/locales/en/common.json (translations)
+- frontend/src/i18n/locales/fa/common.json (translations)
 
 ## Dependencies
-- T062 (RTL CSS support in index.css)
+- T074-T086 (Backend enhanced registration fields complete)
 
 ## Acceptance Criteria
-- Persian text renders correctly with proper font
-- Text alignment flips correctly between languages
-- All components display properly in RTL mode
-- No visual regressions when switching languages
+- Full name input field visible in registration form
+- Label and placeholder in both EN/FA
+- Value bound to form state
+- Submitted to API during registration
 
 ## Definition of Done
-- Manual testing completed in both languages
-- CURRENT_TASK.md updated with test results
-- Git commit created for T062 changes
+- Full name field added to registration form
+- Translations added for EN/FA
+- Git commit created

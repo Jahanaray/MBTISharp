@@ -128,32 +128,32 @@
 ### Testing & Polish (T071-T073)
 | ID | Goal | Dependencies | Status |
 |----|------|--------------|--------|
-| T071 | Test full registration flow with password | T054 | PENDING |
-| T072 | Test language toggle and RTL layout | T063 | PENDING |
-| T073 | Verify all pages display correctly in both languages | T070-T072 | PENDING |
+| T071 | Test full registration flow with password | T054 | DONE |
+| T072 | Test language toggle and RTL layout | T063 | DONE |
+| T073 | Verify all pages display correctly in both languages | T070-T072 | DONE |
 
 ## Phase 3: User Feedback Implementation
 
 ### Backend: Enhanced User Model (T074-T080)
 | ID | Goal | Dependencies | Status |
 |----|------|--------------|--------|
-| T074 | Add FullName column to User model | - | PENDING |
-| T075 | Add City column to User model | T074 | PENDING |
-| T076 | Add Latitude and Longitude columns to User model | T074 | PENDING |
-| T077 | Add ProfilePhotoPath column to User model | T074 | PENDING |
-| T078 | Add TermsAccepted column to User model | T074 | PENDING |
-| T079 | Add AllowChat, AllowMeetInPerson, AllowCallVerification columns to User model | T078 | PENDING |
-| T080 | Add InterestedMBTIs column to User model | T079 | PENDING |
+| T074 | Add FullName column to User model | - | DONE |
+| T075 | Add City column to User model | T074 | DONE |
+| T076 | Add Latitude and Longitude columns to User model | T074 | DONE |
+| T077 | Add ProfilePhotoPath column to User model | T074 | DONE |
+| T078 | Add TermsAccepted column to User model | T074 | DONE |
+| T079 | Add AllowChat, AllowMeetInPerson, AllowCallVerification columns to User model | T078 | DONE |
+| T080 | Add InterestedMBTIs column to User model | T079 | DONE |
 
 ### Backend: Enhanced Registration API (T081-T086)
 | ID | Goal | Dependencies | Status |
 |----|------|--------------|--------|
-| T081 | Update RegisterRequest DTO with new fields | T074 | PENDING |
-| T082 | Add file upload handling to AuthController | T081 | PENDING |
-| T083 | Update ApplicationDbContext for new User columns | T074 | PENDING |
-| T084 | Create migration for User table changes | T083 | PENDING |
-| T085 | Add validation for required registration fields | T082 | PENDING |
-| T086 | Test enhanced registration endpoint | T085 | PENDING |
+| T081 | Update RegisterRequest DTO with new fields | T074 | DONE |
+| T082 | Add file upload handling to AuthController | T081 | DONE |
+| T083 | Update ApplicationDbContext for new User columns | T074 | DONE |
+| T084 | Create migration for User table changes | T083 | DONE |
+| T085 | Add validation for required registration fields | T082 | DONE |
+| T086 | Test enhanced registration endpoint | T085 | DONE |
 
 ### Frontend: Enhanced Registration Form (T087-T095)
 | ID | Goal | Dependencies | Status |
