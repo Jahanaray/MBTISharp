@@ -171,8 +171,8 @@
 ### Frontend: Registration i18n (T096-T097)
 | ID | Goal | Dependencies | Status |
 |----|------|--------------|--------|
-| T096 | Add registration translations to English JSON | - | PENDING |
-| T097 | Add registration translations to Persian JSON | T096 | PENDING |
+| T096 | Add registration translations to English JSON | - | DONE |
+| T097 | Add registration translations to Persian JSON | T096 | DONE |
 
 ### Backend: Safety Filter Service (T098-T103)
 | ID | Goal | Dependencies | Status |

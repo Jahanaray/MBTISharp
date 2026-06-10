@@ -1,23 +1,19 @@
-# Current Task: T087
+# Current Task: T096-T097
 
 ## Goal
-Add full name input field to registration form
+Mark registration translation tasks as DONE (translations already added in T087-T095)
 
 ## Files Affected
-- frontend/src/pages/Login.tsx (registration form)
-- frontend/src/i18n/locales/en/common.json (translations)
-- frontend/src/i18n/locales/fa/common.json (translations)
+- docs/TASKS.md (mark T096-T097 DONE)
+- docs/CURRENT_TASK.md
 
 ## Dependencies
-- T074-T086 (Backend enhanced registration fields complete)
+- T087-T095 (registration form fields and translations)
 
 ## Acceptance Criteria
-- Full name input field visible in registration form
-- Label and placeholder in both EN/FA
-- Value bound to form state
-- Submitted to API during registration
+- All registration field translations exist in EN/FA JSON files
+- TASKS.md updated
 
 ## Definition of Done
-- Full name field added to registration form
-- Translations added for EN/FA
+- TASKS.md updated
 - Git commit created
