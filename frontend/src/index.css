@@ -1,0 +1,49 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* RTL/LTR direction handling */
+html {
+  direction: ltr;
+}
+
+html[dir="rtl"] {
+  direction: rtl;
+}
+
+/* Body styling with directional support */
+body {
+  margin: 0;
+  font-family: system-ui, -apple-system, sans-serif;
+  -webkit-font-smoothing: antialiased;
+  background-color: rgb(249, 250, 251);
+  color: rgb(17, 24, 39);
+}
+
+/* RTL body styling */
+html[dir="rtl"] body {
+  direction: rtl;
+}
+
+/* Ensure inputs and textareas align properly in both directions */
+html[dir="rtl"] input,
+html[dir="rtl"] textarea,
+html[dir="rtl"] select {
+  text-align: right;
+}
+
+html[dir="ltr"] input,
+html[dir="ltr"] textarea,
+html[dir="ltr"] select {
+  text-align: left;
+}
+
+/* Persian font support for RTL mode */
+html[dir="rtl"] body {
+  font-family: 'Vazirmatn', 'IRANSans', system-ui, -apple-system, sans-serif;
+}
+
+/* Ensure proper font for English/LTR mode */
+html[dir="ltr"] body {
+  font-family: system-ui, -apple-system, sans-serif;
+}
