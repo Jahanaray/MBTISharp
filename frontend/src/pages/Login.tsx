@@ -7,6 +7,7 @@ type Step = 'phone' | 'otp' | 'success'
 function Login() {
   const { t } = useTranslation()
   const [step, setStep] = useState<Step>('phone')
+  const [fullName, setFullName] = useState('')
   const [phoneNumber, setPhoneNumber] = useState('')
   const [otp, setOtp] = useState('')
   const [loading, setLoading] = useState(false)
@@ -24,7 +25,7 @@ function Login() {
       const response = await fetch('/api/auth/register', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ phoneNumber })
+        body: JSON.stringify({ phoneNumber, fullName })
       })
       if (response.ok) {
         setStep('otp')
@@ -82,6 +83,21 @@ function Login() {
               
               <form onSubmit={handleSendOtp} className="space-y-4">
                 <div>
+                  <label htmlFor="fullName" className="block text-sm font-medium text-gray-700 mb-1">
+                    {t('auth.fullName', 'Full Name')}
+                  </label>
+                  <input
+                    id="fullName"
+                    type="text"
+                    value={fullName}
+                    onChange={(e) => setFullName(e.target.value)}
+                    placeholder={t('auth.enterFullName', 'Enter your full name')}
+                    required
+                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent outline-none"
+                  />
+                </div>
+
+                <div>
                   <label htmlFor="phone" className="block text-sm font-medium text-gray-700 mb-1">
                     {t('auth.phoneNumber', 'Phone Number')}
                   </label>
@@ -91,6 +107,7 @@ function Login() {
                     value={phoneNumber}
                     onChange={(e) => setPhoneNumber(e.target.value)}
                     placeholder="+1234567890"
+                    required
                     className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent outline-none"
                   />
                 </div>
