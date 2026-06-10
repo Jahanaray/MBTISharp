@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react'
 import { Link, useSearchParams } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
+import { funnyMbtiDescriptions } from '../data/mbtiDescriptions'
 
 interface QuizResult {
   MBTIType: string
@@ -19,6 +20,7 @@ function Result() {
   const [searchParams] = useSearchParams()
   const [result, setResult] = useState<QuizResult | null>(null)
   const [loading, setLoading] = useState(true)
+  const [showFunny, setShowFunny] = useState(false)
 
   useEffect(() => {
     const mbtiType = searchParams.get('type')
@@ -128,6 +130,38 @@ function Result() {
             {t(TYPE_TITLES[result.MBTIType] || 'result.yourType', result.MBTIType)}
           </h3>
           <p className="text-gray-600 max-w-lg mx-auto mb-6">{desc}</p>
+          
+          {/* Funny Toggle */}
+          {(() => {
+            const descData = funnyMbtiDescriptions[result.MBTIType]
+            if (!descData) return null
+            const funnyTitle = t(`result.funnyTypeTitles.${result.MBTIType}`, descData.funnyTitle)
+            const funnyDesc = t(`result.funnyTypeDescs.${result.MBTIType}`, descData.funnyDesc)
+            const funnyTraits = descData.funnyTraits
+            return (
+              <>
+                <button
+                  onClick={() => setShowFunny(!showFunny)}
+                  className="text-sm text-purple-600 hover:text-purple-700 underline mb-4 inline-block"
+                >
+                  {showFunny ? t('result.showSerious', 'Show serious description') : t('result.showFunny', 'Show funny description 🎭')}
+                </button>
+                {showFunny && (
+                  <>
+                    <h3 className="text-xl font-medium text-purple-700 mb-2 italic">{funnyTitle}</h3>
+                    <p className="text-gray-600 max-w-lg mx-auto mb-4 italic">{funnyDesc}</p>
+                    <div className="flex flex-wrap justify-center gap-2 mb-6">
+                      {funnyTraits.map((trait, i) => (
+                        <span key={i} className="px-4 py-2 bg-purple-50 text-purple-700 rounded-full text-sm font-medium">
+                          {t(`result.funnyTraits.${result.MBTIType}.${i}`, trait)}
+                        </span>
+                      ))}
+                    </div>
+                  </>
+                )}
+              </>
+            )
+          })()}
           
           {/* Traits */}
           <div className="flex flex-wrap justify-center gap-2 mb-8">

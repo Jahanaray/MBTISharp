@@ -194,22 +194,22 @@
 ### Content: Funny MBTI Descriptions (T107-T122)
 | ID | Goal | Dependencies | Status |
 |----|------|--------------|--------|
-| T107 | Write funny INTJ description (EN/FA) | - | PENDING |
-| T108 | Write funny INTP description (EN/FA) | T107 | PENDING |
-| T109 | Write funny ENTJ description (EN/FA) | T107 | PENDING |
-| T110 | Write funny ENTP description (EN/FA) | T107 | PENDING |
-| T111 | Write funny INFJ description (EN/FA) | T107 | PENDING |
-| T112 | Write funny INFP description (EN/FA) | T107 | PENDING |
-| T113 | Write funny ENFJ description (EN/FA) | T107 | PENDING |
-| T114 | Write funny ENFP description (EN/FA) | T107 | PENDING |
-| T115 | Write funny ISTJ description (EN/FA) | T107 | PENDING |
-| T116 | Write funny ISFJ description (EN/FA) | T107 | PENDING |
-| T117 | Write funny ESFJ description (EN/FA) | T107 | PENDING |
-| T118 | Write funny ESTJ description (EN/FA) | T107 | PENDING |
-| T119 | Write funny ISTP description (EN/FA) | T107 | PENDING |
-| T120 | Write funny ISFP description (EN/FA) | T107 | PENDING |
-| T121 | Write funny ESFP description (EN/FA) | T107 | PENDING |
-| T122 | Write funny ESTP description (EN/FA) | T107 | PENDING |
+| T107 | Write funny INTJ description (EN/FA) | - | DONE |
+| T108 | Write funny INTP description (EN/FA) | T107 | DONE |
+| T109 | Write funny ENTJ description (EN/FA) | T107 | DONE |
+| T110 | Write funny ENTP description (EN/FA) | T107 | DONE |
+| T111 | Write funny INFJ description (EN/FA) | T107 | DONE |
+| T112 | Write funny INFP description (EN/FA) | T107 | DONE |
+| T113 | Write funny ENFJ description (EN/FA) | T107 | DONE |
+| T114 | Write funny ENFP description (EN/FA) | T107 | DONE |
+| T115 | Write funny ISTJ description (EN/FA) | T107 | DONE |
+| T116 | Write funny ISFJ description (EN/FA) | T107 | DONE |
+| T117 | Write funny ESFJ description (EN/FA) | T107 | DONE |
+| T118 | Write funny ESTJ description (EN/FA) | T107 | DONE |
+| T119 | Write funny ISTP description (EN/FA) | T107 | DONE |
+| T120 | Write funny ISFP description (EN/FA) | T107 | DONE |
+| T121 | Write funny ESFP description (EN/FA) | T107 | DONE |
+| T122 | Write funny ESTP description (EN/FA) | T107 | DONE |
 
 ### Content: Legal Agreement Page (T123-T128)
 | ID | Goal | Dependencies | Status |
