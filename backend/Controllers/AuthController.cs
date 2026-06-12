@@ -33,30 +33,29 @@ public class AuthController : ControllerBase
     }
 
     [HttpPost("register")]
-    public async Task<IActionResult> Register([FromForm] RegisterRequest request)
+    public async Task<IActionResult> Register([FromBody] RegisterRequest request)
     {
-        if (string.IsNullOrWhiteSpace(request.PhoneNumber) || string.IsNullOrWhiteSpace(request.Password) || string.IsNullOrWhiteSpace(request.FullName))
-            return BadRequest(new { message = "Phone number, password, and full name are required" });
+        if (string.IsNullOrWhiteSpace(request.Email) || string.IsNullOrWhiteSpace(request.Password) || string.IsNullOrWhiteSpace(request.FullName))
+            return BadRequest(new { message = "Email, password, and full name are required" });
 
         if (!request.TermsAccepted)
             return BadRequest(new { message = "You must accept the terms and rules" });
 
+        // Validate email format
+        var emailRegex = @"^[^@\s]+@[^@\s]+\.[^@\s]+$";
+        if (!System.Text.RegularExpressions.Regex.IsMatch(request.Email, emailRegex))
+            return BadRequest(new { message = "Invalid email format" });
+
+        // Validate password strength
+        if (request.Password.Length < 6)
+            return BadRequest(new { message = "Password must be at least 6 characters" });
+
         if (!_safetyFilter.IsContentSafe(request.FullName))
             return BadRequest(new { message = "Invalid content detected in your name" });
-        
-        if (!_safetyFilter.IsContentSafe(request.City))
-            return BadRequest(new { message = "Invalid content detected in your city" });
 
-        var existingByPhone = await _context.Users.FirstOrDefaultAsync(u => u.PhoneNumber == request.PhoneNumber);
-        if (existingByPhone != null)
-            return Conflict(new { message = "Phone number already registered" });
-
-        if (!string.IsNullOrWhiteSpace(request.Email))
-        {
-            var existingByEmail = await _context.Users.FirstOrDefaultAsync(u => u.Email == request.Email);
-            if (existingByEmail != null)
-                return Conflict(new { message = "Email already registered" });
-        }
+        var existingByEmail = await _context.Users.FirstOrDefaultAsync(u => u.Email == request.Email);
+        if (existingByEmail != null)
+            return Conflict(new { message = "Email already registered" });
 
         var passwordHash = HashPassword(request.Password);
 
@@ -81,11 +80,12 @@ public class AuthController : ControllerBase
         var user = new User
         {
             Id = Guid.NewGuid(),
-            PhoneNumber = request.PhoneNumber,
-            Email = request.Email ?? string.Empty,
+            Email = request.Email.ToLower().Trim(),
             PasswordHash = passwordHash,
-            EmailVerified = !string.IsNullOrWhiteSpace(request.Email),
+            EmailVerified = true,
             FullName = _safetyFilter.FilterContent(request.FullName),
+            BirthDate = request.BirthDate,
+            Gender = request.Gender,
             City = _safetyFilter.FilterContent(request.City),
             Latitude = request.Latitude,
             Longitude = request.Longitude,
@@ -101,9 +101,14 @@ public class AuthController : ControllerBase
         _context.Users.Add(user);
         await _context.SaveChangesAsync();
 
-        _logger.LogInformation("User registered: {PhoneNumber}", request.PhoneNumber);
+        _logger.LogInformation("User registered: {Email}", request.Email);
 
-        return Ok(new { message = "Registration successful" });
+        return Ok(new AuthResponse
+        {
+            Token = GenerateJwtToken(user),
+            RefreshToken = GenerateRefreshToken(),
+            ExpiresAt = DateTime.UtcNow.AddHours(1)
+        });
     }
 
     [HttpPost("login")]
@@ -112,7 +117,7 @@ public class AuthController : ControllerBase
         if (string.IsNullOrWhiteSpace(request.Email) || string.IsNullOrWhiteSpace(request.Password))
             return BadRequest(new { message = "Email and password are required" });
 
-        var user = await _context.Users.FirstOrDefaultAsync(u => u.Email == request.Email);
+        var user = await _context.Users.FirstOrDefaultAsync(u => u.Email == request.Email.ToLower().Trim());
 
         if (user == null || !VerifyPassword(request.Password, user.PasswordHash))
             return Unauthorized(new { message = "Invalid email or password" });
@@ -137,9 +142,10 @@ public class AuthController : ControllerBase
         var profile = new UserProfileResponse
         {
             Id = user.Id,
-            PhoneNumber = user.PhoneNumber,
             Email = user.Email,
             FullName = user.FullName,
+            BirthDate = user.BirthDate,
+            Gender = user.Gender,
             City = user.City,
             MBTIType = user.MBTIType,
             TermsAccepted = user.TermsAccepted,

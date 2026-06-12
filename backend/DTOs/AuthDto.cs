@@ -2,10 +2,11 @@ namespace MBTIMatch.DTOs;
 
 public class RegisterRequest
 {
-    public string PhoneNumber { get; set; } = string.Empty;
     public string Email { get; set; } = string.Empty;
     public string Password { get; set; } = string.Empty;
     public string FullName { get; set; } = string.Empty;
+    public DateTime? BirthDate { get; set; }
+    public string Gender { get; set; } = string.Empty; // Male, Female, Other
     public string City { get; set; } = string.Empty;
     public decimal? Latitude { get; set; }
     public decimal? Longitude { get; set; }
@@ -32,9 +33,10 @@ public class AuthResponse
 public class UserProfileResponse
 {
     public Guid Id { get; set; }
-    public string PhoneNumber { get; set; } = string.Empty;
     public string Email { get; set; } = string.Empty;
     public string FullName { get; set; } = string.Empty;
+    public DateTime? BirthDate { get; set; }
+    public string Gender { get; set; } = string.Empty;
     public string City { get; set; } = string.Empty;
     public string? MBTIType { get; set; }
     public bool TermsAccepted { get; set; }
