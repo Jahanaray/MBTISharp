@@ -2,7 +2,7 @@ namespace MBTIMatch.DTOs;
 
 public class CreateMatchRequest
 {
-    public Guid UserId { get; set; }
+    public string UserId { get; set; } = string.Empty;
 }
 
 public class MatchResponse

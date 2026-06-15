@@ -69,7 +69,7 @@ function Chat() {
 
   const initSignalR = async (matchId: string) => {
     const connection = new HubConnectionBuilder()
-      .withUrl(`${window.location.origin}/chatHub`, {
+      .withUrl('/chatHub', {
         transport: HttpTransportType.WebSockets | HttpTransportType.ServerSentEvents | HttpTransportType.LongPolling
       })
       .withAutomaticReconnect()

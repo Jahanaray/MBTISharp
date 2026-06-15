@@ -22,10 +22,23 @@ public class QuizController : ControllerBase
     [HttpPost("submit")]
     public async Task<IActionResult> SubmitQuiz([FromBody] SubmitQuizRequest request)
     {
+        if (request.Answers == null || !request.Answers.Any())
+            return BadRequest(new { message = "No answers provided" });
+
+        Guid userId;
+        try
+        {
+            userId = string.IsNullOrEmpty(request.UserId) ? Guid.NewGuid() : Guid.Parse(request.UserId);
+        }
+        catch
+        {
+            userId = Guid.Parse(request.UserId.Replace("-", "").Substring(0, 32).PadRight(32, '0'));
+        }
+
         var answers = request.Answers.Select(a => new Answer
         {
             Id = Guid.NewGuid(),
-            UserId = request.UserId,
+            UserId = userId,
             QuestionId = a.QuestionId,
             SelectedOption = a.SelectedOption,
             CreatedAt = DateTime.UtcNow
@@ -34,7 +47,15 @@ public class QuizController : ControllerBase
         _context.Answers.AddRange(answers);
         await _context.SaveChangesAsync();
 
-        var result = CalculateMBTI(request.UserId);
+        var result = CalculateMBTI(userId);
+
+        // Save the MBTI type to the user's record if user exists
+        var existingUser = await _context.Users.FindAsync(userId);
+        if (existingUser != null)
+        {
+            existingUser.MBTIType = result.MBTIType;
+            await _context.SaveChangesAsync();
+        }
 
         return Ok(result);
     }
@@ -54,12 +75,27 @@ public class QuizController : ControllerBase
         if (user == null)
             return NotFound(new { message = "User not found" });
 
+        // If user has no MBTI type yet, calculate it from answers
+        if (string.IsNullOrEmpty(user.MBTIType))
+        {
+            var result = CalculateMBTI(userId);
+            if (!string.IsNullOrEmpty(result.MBTIType) && result.MBTIType != "Not completed")
+            {
+                user.MBTIType = result.MBTIType;
+                await _context.SaveChangesAsync();
+                return Ok(new { MBTIType = result.MBTIType });
+            }
+        }
+
         return Ok(new { MBTIType = user.MBTIType ?? "Not completed" });
     }
 
     private QuizResult CalculateMBTI(Guid userId)
     {
         var answers = _context.Answers.Where(a => a.UserId == userId).ToList();
+        if (!answers.Any())
+            return new QuizResult { MBTIType = "Not completed", Scores = new Dictionary<string, int>() };
+
         var questions = _context.Questions.ToList();
 
         var scores = new Dictionary<string, int>

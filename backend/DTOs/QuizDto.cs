@@ -8,7 +8,7 @@ public class SubmitAnswerRequest
 
 public class SubmitQuizRequest
 {
-    public Guid UserId { get; set; }
+    public string UserId { get; set; } = string.Empty;
     public List<SubmitAnswerRequest> Answers { get; set; } = new();
 }
 

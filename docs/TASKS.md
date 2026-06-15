@@ -158,15 +158,15 @@
 ### Frontend: Enhanced Registration Form (T087-T095)
 | ID | Goal | Dependencies | Status |
 |----|------|--------------|--------|
-| T087 | Add full name input field to registration form | - | PENDING |
-| T088 | Add city input field to registration form | T087 | PENDING |
-| T089 | Add photo upload component to registration form | T088 | PENDING |
-| T090 | Add geolocation button and API integration | T089 | PENDING |
-| T091 | Add terms acceptance checkbox to registration form | T090 | PENDING |
-| T092 | Add chat preference checkbox to registration form | T091 | PENDING |
-| T093 | Add meet-in-person preference checkbox to registration form | T092 | PENDING |
-| T094 | Add call verification consent checkbox to registration form | T093 | PENDING |
-| T095 | Add MBTI type interest multi-select to registration form | T094 | PENDING |
+| T087 | Add full name input field to registration form | - | DONE |
+| T088 | Add city input field to registration form | T087 | DONE |
+| T089 | Add photo upload component to registration form | T088 | DONE |
+| T090 | Add geolocation button and API integration | T089 | DONE |
+| T091 | Add terms acceptance checkbox to registration form | T090 | DONE |
+| T092 | Add chat preference checkbox to registration form | T091 | DONE |
+| T093 | Add meet-in-person preference checkbox to registration form | T092 | DONE |
+| T094 | Add call verification consent checkbox to registration form | T093 | DONE |
+| T095 | Add MBTI type interest multi-select to registration form | T094 | DONE |
 
 ### Frontend: Registration i18n (T096-T097)
 | ID | Goal | Dependencies | Status |
@@ -240,9 +240,9 @@
 | T138 | Update AI_CONTEXT.md with latest decisions | T137 | DONE |
 
 ## Phase 4: Post-MVP Future Features
-| ID | Goal | Dependencies |
-|----|------|--------------|
-| T139 | Implement deterministic MBTI matching algorithm | - |
+| ID | Goal | Dependencies | Status |
+|----|------|--------------|--------|
+| T139 | Implement deterministic MBTI matching algorithm | - | DONE |
 | T140 | Add AI-driven compatibility recommendations | T139 |
 | T141 | Add analytics dashboard | - |
 | T142 | Performance optimization and load testing | - |

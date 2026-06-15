@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react'
-import { Link } from 'react-router-dom'
+import { Link, useNavigate } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
 
 interface Question {
@@ -14,12 +14,32 @@ interface Question {
 
 function Quiz() {
   const { t } = useTranslation()
+  const navigate = useNavigate()
   const [questions, setQuestions] = useState<Question[]>([])
   const [currentIndex, setCurrentIndex] = useState(0)
   const [answers, setAnswers] = useState<Record<number, string>>({})
   const [loading, setLoading] = useState(true)
   const [submitted, setSubmitted] = useState(false)
   const [result, setResult] = useState<{ MBTIType: string; Scores: Record<string, number> } | null>(null)
+
+  // Get authenticated user ID from token
+  const getUserId = (): string | null => {
+    const token = localStorage.getItem('authToken')
+    if (!token) return null
+    
+    try {
+      const payload = token.split('.')[1]
+      if (payload) {
+        const decoded = JSON.parse(atob(payload))
+        return decoded.nameidentifier || decoded.sub || decoded.unique_name
+      }
+    } catch {
+      // Fallback to stored userId
+      const stored = localStorage.getItem('userId')
+      if (stored) return stored
+    }
+    return null
+  }
 
   useEffect(() => {
     fetchQuestions()
@@ -54,7 +74,16 @@ function Quiz() {
       return
     }
 
-    const userId = crypto.randomUUID()
+    const userIdStr = getUserId()
+    let userId: string
+    
+    // Try to parse as GUID, fallback to UUID
+    try {
+      userId = userIdStr ? (userIdStr.includes('-') ? userIdStr : JSON.parse(`"${userIdStr}"`).replace(/[0-9a-f]{8}-([0-9a-f]{4})-([0-9a-f]{4})-([0-9a-f]{4})-([0-9a-f]{12})/, '$1$2$3$4')) : crypto.randomUUID()
+    } catch {
+      userId = crypto.randomUUID()
+    }
+
     const answersArray = Object.entries(answers).map(([questionId, selectedOption]) => ({
       questionId: parseInt(questionId),
       selectedOption
@@ -71,6 +100,10 @@ function Quiz() {
         const data = await response.json()
         setResult(data)
         setSubmitted(true)
+        localStorage.setItem('quizResult', JSON.stringify(data))
+      } else {
+        const error = await response.json().catch(() => ({ message: 'Submission failed' }))
+        alert(error.message || 'Submission failed')
       }
     } catch (error) {
       console.error('Failed to submit quiz:', error)
@@ -109,16 +142,16 @@ function Quiz() {
 
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
               <Link
-                to="/"
+                to="/dashboard"
                 className="px-6 py-3 bg-primary text-white rounded-lg hover:bg-blue-600 transition-colors font-medium"
               >
-                {t('result.backToHome', 'Back to Home')}
+                {t('result.goToDashboard', 'Go to Dashboard')}
               </Link>
               <Link
-                to="/login"
+                to="/quiz"
                 className="px-6 py-3 bg-white text-primary border-2 border-primary rounded-lg hover:bg-blue-50 transition-colors font-medium"
               >
-                {t('result.signInToSave', 'Sign In to Save')}
+                {t('result.retakeQuiz', 'Retake Quiz')}
               </Link>
             </div>
           </div>

@@ -1,138 +1,189 @@
 import { useState } from 'react'
-import { Link } from 'react-router-dom'
+import { Link, useNavigate } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
 import { isContentSafe } from '../utils/safetyFilter'
 
-type Step = 'phone' | 'otp' | 'success'
+type View = 'login' | 'signup'
 
 function Login() {
   const { t } = useTranslation()
-  const [step, setStep] = useState<Step>('phone')
+  const navigate = useNavigate()
+  const [view, setView] = useState<View>('login')
+  
+  // Login fields
+  const [email, setEmail] = useState('')
+  const [password, setPassword] = useState('')
+  
+  // Signup fields
   const [fullName, setFullName] = useState('')
-  const [phoneNumber, setPhoneNumber] = useState('')
+  const [confirmPassword, setConfirmPassword] = useState('')
+  const [birthDate, setBirthDate] = useState('')
+  const [gender, setGender] = useState('')
   const [city, setCity] = useState('')
-  const [photoFile, setPhotoFile] = useState<File | null>(null)
-  const [latitude, setLatitude] = useState<number | undefined>()
-  const [longitude, setLongitude] = useState<number | undefined>()
   const [termsAccepted, setTermsAccepted] = useState(false)
   const [allowChat, setAllowChat] = useState(true)
   const [allowMeetInPerson, setAllowMeetInPerson] = useState(false)
-  const [allowCallVerification, setAllowCallVerification] = useState(false)
-  const [interestedMBTIs, setInterestedMBTIs] = useState<string[]>([])
-  const [contentError, setContentError] = useState('')
-  const [otp, setOtp] = useState('')
-
-  const mbtiTypes = ['INTJ', 'INTP', 'ENTJ', 'ENTP', 'INFJ', 'INFP', 'ENFJ', 'ENFP', 'ISTJ', 'ISFJ', 'ESFJ', 'ESTJ', 'ISTP', 'ISFP', 'ESFP', 'ESTP']
-
-  const toggleMBTI = (type: string) => {
-    setInterestedMBTIs(prev =>
-      prev.includes(type) ? prev.filter(t => t !== type) : [...prev, type]
-    )
-  }
+  
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
+  const [validationErrors, setValidationErrors] = useState<Record<string, string>>({})
 
-  const handleGetLocation = () => {
-    if (!navigator.geolocation) {
-      setError(t('auth.geolocationNotSupported', 'Geolocation is not supported by your browser.'))
-      return
-    }
-    setLoading(true)
-    navigator.geolocation.getCurrentPosition(
-      (position) => {
-        setLatitude(position.coords.latitude)
-        setLongitude(position.coords.longitude)
-        setError('')
-        setLoading(false)
-      },
-      () => {
-        setError(t('auth.locationDenied', 'Location access was denied. Please enable it in settings.'))
-        setLoading(false)
-      }
-    )
+  const switchView = (v: View) => {
+    setView(v)
+    setError('')
+    setValidationErrors({})
+    setEmail('')
+    setPassword('')
+    setFullName('')
+    setConfirmPassword('')
+    setBirthDate('')
+    setGender('')
+    setCity('')
+    setTermsAccepted(false)
   }
 
-  const handleSendOtp = async (e: React.FormEvent) => {
+  const validateSignup = (): boolean => {
+    const errors: Record<string, string> = {}
+
+    // Email validation
+    if (!email.trim()) {
+      errors.email = 'Email is required'
+    } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+      errors.email = 'Invalid email format'
+    }
+
+    // Password validation
+    if (!password) {
+      errors.password = 'Password is required'
+    } else if (password.length < 6) {
+      errors.password = 'Password must be at least 6 characters'
+    }
+
+    // Confirm password
+    if (password !== confirmPassword) {
+      errors.confirmPassword = 'Passwords do not match'
+    }
+
+    // Full name validation
+    if (!fullName.trim()) {
+      errors.fullName = 'Full name is required'
+    } else if (!isContentSafe(fullName.trim())) {
+      errors.fullName = 'Invalid content in name'
+    }
+
+    // Birthdate validation (mandatory)
+    if (!birthDate) {
+      errors.birthDate = 'Birthdate is required'
+    } else {
+      const birth = new Date(birthDate)
+      const age = (Date.now() - birth.getTime()) / (365.25 * 24 * 60 * 60 * 1000)
+      if (age < 18) {
+        errors.birthDate = 'You must be at least 18 years old'
+      }
+      if (age > 120) {
+        errors.birthDate = 'Invalid birthdate'
+      }
+    }
+
+    // Gender validation (mandatory)
+    if (!gender) {
+      errors.gender = 'Gender is required'
+    }
+
+    // Terms acceptance (mandatory)
+    if (!termsAccepted) {
+      errors.terms = 'You must accept the terms and rules'
+    }
+
+    if (Object.keys(errors).length > 0) {
+      setValidationErrors(errors)
+      return false
+    }
+    return true
+  }
+
+  const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault()
-    if (!phoneNumber.trim()) {
-      setError(t('auth.enterPhone', 'Please enter a phone number.'))
-      return
-    }
-    // Client-side safety filter validation (T104-T105)
-    setContentError('')
-    if (fullName.trim() && !isContentSafe(fullName.trim())) {
-      setContentError(t('auth.contentUnsafe', 'Your name contains inappropriate language.'))
-      return
-    }
-    if (city.trim() && !isContentSafe(city.trim())) {
-      setContentError(t('auth.contentUnsafe', 'Your city name contains inappropriate language.'))
-      return
-    }
-    setLoading(true)
     setError('')
+    
+    if (!email.trim()) {
+      setError('Email is required')
+      return
+    }
+    if (!password) {
+      setError('Password is required')
+      return
+    }
+
+    setLoading(true)
     try {
-      const body: BodyInit | null = photoFile
-        ? (() => {
-            const formData = new FormData()
-            formData.append('phoneNumber', phoneNumber)
-            formData.append('fullName', fullName)
-            formData.append('city', city)
-            formData.append('termsAccepted', termsAccepted.toString())
-            formData.append('allowChat', allowChat.toString())
-            formData.append('allowMeetInPerson', allowMeetInPerson.toString())
-            formData.append('allowCallVerification', allowCallVerification.toString())
-            if (interestedMBTIs.length) formData.append('interestedMBTIs', interestedMBTIs.join(','))
-            if (latitude) formData.append('latitude', latitude.toString())
-            if (longitude) formData.append('longitude', longitude.toString())
-            if (photoFile) formData.append('photo', photoFile)
-            return formData
-          })()
-        : JSON.stringify({ phoneNumber, fullName, city, latitude, longitude, termsAccepted, allowChat, allowMeetInPerson, allowCallVerification, interestedMBTIs: interestedMBTIs.join(',') })
-      
-      const headers: HeadersInit = photoFile
-        ? {}
-        : { 'Content-Type': 'application/json' }
-      
-      const response = await fetch('/api/auth/register', {
+      const response = await fetch('/api/auth/login', {
         method: 'POST',
-        headers,
-        body
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email: email.toLowerCase(), password })
       })
+
       if (response.ok) {
-        setStep('otp')
+        const data = await response.json()
+        localStorage.setItem('authToken', data.token)
+        navigate('/dashboard')
       } else {
-        setError(t('auth.otpFailed', 'Failed to send OTP. Please try again.'))
+        const data = await response.json().catch(() => ({ message: 'Login failed' }))
+        setError(data.message || 'Login failed')
       }
     } catch {
-      setError(t('auth.networkError', 'Network error. Please check your connection.'))
+      setError('Network error. Please check your connection.')
     } finally {
       setLoading(false)
     }
   }
 
-  const handleVerifyOtp = async (e: React.FormEvent) => {
+  const handleSignup = async (e: React.FormEvent) => {
     e.preventDefault()
-    if (!otp.trim()) {
-      setError(t('auth.enterOtp', 'Please enter the OTP.'))
-      return
-    }
-    setLoading(true)
     setError('')
+    setValidationErrors({})
+
+    if (!validateSignup()) return
+
+    setLoading(true)
     try {
-      const response = await fetch('/api/auth/verify', {
+      const response = await fetch('/api/auth/register', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ phoneNumber, otp })
+        body: JSON.stringify({
+          email: email.toLowerCase().trim(),
+          password,
+          fullName: fullName.trim(),
+          birthDate,
+          gender,
+          city: city.trim() || 'Unknown',
+          termsAccepted,
+          allowChat,
+          allowMeetInPerson,
+          allowCallVerification: false,
+          interestedMBTIs: ''
+        })
       })
+
       if (response.ok) {
         const data = await response.json()
         localStorage.setItem('authToken', data.token)
-        setStep('success')
+        navigate('/dashboard')
       } else {
-        setError(t('auth.invalidOtp', 'Invalid OTP. Please try again.'))
+        const data = await response.json().catch(() => ({ message: 'Registration failed' }))
+        if (data.errors && Array.isArray(data.errors)) {
+          setValidationErrors(Object.fromEntries(data.errors.map((e: any) => [e.field || 'general', e.message])))
+          setError('Validation failed. Please check the form.')
+        } else {
+          const msg = data.message || 'Registration failed'
+          if (msg.includes('already registered')) {
+            setValidationErrors({ email: 'Email already registered' })
+          }
+          setError(msg)
+        }
       }
     } catch {
-      setError(t('auth.networkError', 'Network error. Please check your connection.'))
+      setError('Network error. Please check your connection.')
     } finally {
       setLoading(false)
     }
@@ -147,85 +198,179 @@ function Login() {
         </Link>
 
         <div className="bg-white rounded-2xl shadow-lg p-8">
-          {step === 'phone' && (
+          {view === 'login' ? (
             <>
-              <h2 className="text-2xl font-bold text-gray-900 mb-2 text-center">{t('auth.signIn', 'Sign In')}</h2>
-              <p className="text-gray-600 mb-6 text-center">{t('auth.enterPhoneDesc', 'Enter your phone number to receive an OTP.')}</p>
+              <h2 className="text-2xl font-bold text-gray-900 mb-2 text-center">Sign In</h2>
+              <p className="text-gray-600 mb-6 text-center">Enter your email and password to continue.</p>
               
-              <form onSubmit={handleSendOtp} className="space-y-4">
+              <form onSubmit={handleLogin} className="space-y-4">
                 <div>
-                  <label htmlFor="fullName" className="block text-sm font-medium text-gray-700 mb-1">
-                    {t('auth.fullName', 'Full Name')}
+                  <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-1">
+                    Email
                   </label>
                   <input
-                    id="fullName"
-                    type="text"
-                    value={fullName}
-                    onChange={(e) => setFullName(e.target.value)}
-                    placeholder={t('auth.enterFullName', 'Enter your full name')}
+                    id="email"
+                    type="email"
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
+                    placeholder="your@email.com"
                     required
                     className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent outline-none"
                   />
                 </div>
 
                 <div>
+                  <label htmlFor="password" className="block text-sm font-medium text-gray-700 mb-1">
+                    Password
+                  </label>
+                  <input
+                    id="password"
+                    type="password"
+                    value={password}
+                    onChange={(e) => setPassword(e.target.value)}
+                    placeholder="Enter your password"
+                    required
+                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent outline-none"
+                  />
+                </div>
+
+                {error && (
+                  <p className="text-sm text-red-600 bg-red-50 p-3 rounded-lg">{error}</p>
+                )}
+
+                <button
+                  type="submit"
+                  disabled={loading}
+                  className="w-full py-3 bg-primary text-white rounded-lg hover:bg-blue-600 transition-colors font-medium disabled:opacity-50"
+                >
+                  {loading ? 'Signing in...' : 'Sign In'}
+                </button>
+              </form>
+
+              <p className="text-center text-sm text-gray-600 mt-6">
+                Don't have an account?{' '}
+                <button onClick={() => switchView('signup')} className="text-primary hover:underline font-medium">
+                  Sign Up
+                </button>
+              </p>
+            </>
+          ) : (
+            <>
+              <h2 className="text-2xl font-bold text-gray-900 mb-2 text-center">Create Account</h2>
+              <p className="text-gray-600 mb-6 text-center">All fields are required.</p>
+              
+              <form onSubmit={handleSignup} className="space-y-4">
+                <div>
+                  <label htmlFor="signup-email" className="block text-sm font-medium text-gray-700 mb-1">
+                    Email *
+                  </label>
+                  <input
+                    id="signup-email"
+                    type="email"
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
+                    placeholder="your@email.com"
+                    required
+                    className={`w-full px-4 py-3 border ${validationErrors.email ? 'border-red-500' : 'border-gray-300'} rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent outline-none`}
+                  />
+                  {validationErrors.email && <p className="text-xs text-red-600 mt-1">{validationErrors.email}</p>}
+                </div>
+
+                <div>
+                  <label htmlFor="signup-password" className="block text-sm font-medium text-gray-700 mb-1">
+                    Password *
+                  </label>
+                  <input
+                    id="signup-password"
+                    type="password"
+                    value={password}
+                    onChange={(e) => setPassword(e.target.value)}
+                    placeholder="At least 6 characters"
+                    required
+                    className={`w-full px-4 py-3 border ${validationErrors.password ? 'border-red-500' : 'border-gray-300'} rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent outline-none`}
+                  />
+                  {validationErrors.password && <p className="text-xs text-red-600 mt-1">{validationErrors.password}</p>}
+                </div>
+
+                <div>
+                  <label htmlFor="confirm-password" className="block text-sm font-medium text-gray-700 mb-1">
+                    Confirm Password *
+                  </label>
+                  <input
+                    id="confirm-password"
+                    type="password"
+                    value={confirmPassword}
+                    onChange={(e) => setConfirmPassword(e.target.value)}
+                    placeholder="Re-enter your password"
+                    required
+                    className={`w-full px-4 py-3 border ${validationErrors.confirmPassword ? 'border-red-500' : 'border-gray-300'} rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent outline-none`}
+                  />
+                  {validationErrors.confirmPassword && <p className="text-xs text-red-600 mt-1">{validationErrors.confirmPassword}</p>}
+                </div>
+
+                <div>
+                  <label htmlFor="full-name" className="block text-sm font-medium text-gray-700 mb-1">
+                    Full Name *
+                  </label>
+                  <input
+                    id="full-name"
+                    type="text"
+                    value={fullName}
+                    onChange={(e) => setFullName(e.target.value)}
+                    placeholder="Your full name"
+                    required
+                    className={`w-full px-4 py-3 border ${validationErrors.fullName ? 'border-red-500' : 'border-gray-300'} rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent outline-none`}
+                  />
+                  {validationErrors.fullName && <p className="text-xs text-red-600 mt-1">{validationErrors.fullName}</p>}
+                </div>
+
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <label htmlFor="birth-date" className="block text-sm font-medium text-gray-700 mb-1">
+                      Birthdate *
+                    </label>
+                    <input
+                      id="birth-date"
+                      type="date"
+                      value={birthDate}
+                      onChange={(e) => setBirthDate(e.target.value)}
+                      required
+                      max={new Date(new Date().setFullYear(new Date().getFullYear() - 18)).toISOString().split('T')[0]}
+                      className={`w-full px-4 py-3 border ${validationErrors.birthDate ? 'border-red-500' : 'border-gray-300'} rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent outline-none`}
+                    />
+                    {validationErrors.birthDate && <p className="text-xs text-red-600 mt-1">{validationErrors.birthDate}</p>}
+                  </div>
+
+                  <div>
+                    <label htmlFor="gender" className="block text-sm font-medium text-gray-700 mb-1">
+                      Gender *
+                    </label>
+                    <select
+                      id="gender"
+                      value={gender}
+                      onChange={(e) => setGender(e.target.value)}
+                      required
+                      className={`w-full px-4 py-3 border ${validationErrors.gender ? 'border-red-500' : 'border-gray-300'} rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent outline-none`}
+                    >
+                      <option value="">Select...</option>
+                      <option value="Male">Male</option>
+                      <option value="Female">Female</option>
+                      <option value="Other">Other</option>
+                    </select>
+                    {validationErrors.gender && <p className="text-xs text-red-600 mt-1">{validationErrors.gender}</p>}
+                  </div>
+                </div>
+
+                <div>
                   <label htmlFor="city" className="block text-sm font-medium text-gray-700 mb-1">
-                    {t('auth.city', 'City')}
+                    City *
                   </label>
                   <input
                     id="city"
                     type="text"
                     value={city}
                     onChange={(e) => setCity(e.target.value)}
-                    placeholder={t('auth.enterCity', 'Enter your city')}
-                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent outline-none"
-                  />
-                </div>
-
-                <div>
-                  <label htmlFor="photo" className="block text-sm font-medium text-gray-700 mb-1">
-                    {t('auth.profilePhoto', 'Profile Photo')}
-                  </label>
-                  <input
-                    id="photo"
-                    type="file"
-                    accept="image/*"
-                    onChange={(e) => {
-                      const file = e.target.files?.[0]
-                      if (file) setPhotoFile(file)
-                    }}
-                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent outline-none file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-semibold file:bg-primary file:text-white hover:file:bg-blue-600"
-                  />
-                </div>
-
-                <div className="flex items-center gap-2">
-                  <span className="text-sm text-gray-600">{t('auth.location', 'Location')}</span>
-                  {latitude && longitude ? (
-                    <span className="text-sm text-green-600 font-medium">
-                      {t('auth.locationCaptured', 'Captured ({lat}, {lng})', { lat: latitude.toFixed(4), lng: longitude.toFixed(4) })}
-                    </span>
-                  ) : (
-                    <button
-                      type="button"
-                      onClick={handleGetLocation}
-                      disabled={loading}
-                      className="text-sm px-3 py-1 bg-secondary text-white rounded-lg hover:bg-purple-600 transition-colors disabled:opacity-50"
-                    >
-                      {loading ? t('auth.gettingLocation', 'Getting location...') : t('auth.shareLocation', 'Share Location')}
-                    </button>
-                  )}
-                </div>
-
-                <div>
-                  <label htmlFor="phone" className="block text-sm font-medium text-gray-700 mb-1">
-                    {t('auth.phoneNumber', 'Phone Number')}
-                  </label>
-                  <input
-                    id="phone"
-                    type="tel"
-                    value={phoneNumber}
-                    onChange={(e) => setPhoneNumber(e.target.value)}
-                    placeholder="+1234567890"
+                    placeholder="Your city"
                     required
                     className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent outline-none"
                   />
@@ -241,12 +386,13 @@ function Login() {
                     className="mt-1 w-4 h-4 text-primary border-gray-300 rounded focus:ring-primary"
                   />
                   <label htmlFor="terms" className="ml-2 text-sm text-gray-600">
-                    {t('auth.acceptTerms', 'I agree to the')}{' '}
+                    I agree to the{' '}
                     <a href="/legal" className="text-primary hover:underline" target="_blank">
-                      {t('auth.termsOfService', 'Terms of Service')}
+                      Terms of Service
                     </a>
                   </label>
                 </div>
+                {validationErrors.terms && <p className="text-xs text-red-600">{validationErrors.terms}</p>}
 
                 <div className="flex items-start">
                   <input
@@ -257,7 +403,7 @@ function Login() {
                     className="mt-1 w-4 h-4 text-primary border-gray-300 rounded focus:ring-primary"
                   />
                   <label htmlFor="allowChat" className="ml-2 text-sm text-gray-600">
-                    {t('auth.allowChat', 'Allow chat with matches')}
+                    Allow chat with matches
                   </label>
                 </div>
 
@@ -270,81 +416,8 @@ function Login() {
                     className="mt-1 w-4 h-4 text-primary border-gray-300 rounded focus:ring-primary"
                   />
                   <label htmlFor="allowMeetInPerson" className="ml-2 text-sm text-gray-600">
-                    {t('auth.allowMeetInPerson', 'Allow meet in person')}
+                    Allow meet in person
                   </label>
-                </div>
-
-                <div className="flex items-start">
-                  <input
-                    id="allowCallVerification"
-                    type="checkbox"
-                    checked={allowCallVerification}
-                    onChange={(e) => setAllowCallVerification(e.target.checked)}
-                    className="mt-1 w-4 h-4 text-primary border-gray-300 rounded focus:ring-primary"
-                  />
-                  <label htmlFor="allowCallVerification" className="ml-2 text-sm text-gray-600">
-                    {t('auth.allowCallVerification', 'Allow call verification')}
-                  </label>
-                </div>
-
-                <div>
-                  <p className="text-sm font-medium text-gray-700 mb-2">{t('auth.interestedTypes', 'Interested MBTI Types')}</p>
-                  <div className="grid grid-cols-4 gap-2">
-                    {mbtiTypes.map(type => (
-                      <button
-                        key={type}
-                        type="button"
-                        onClick={() => toggleMBTI(type)}
-                        className={`py-2 px-3 text-xs font-semibold rounded-lg border transition-colors ${
-                          interestedMBTIs.includes(type)
-                            ? 'bg-primary text-white border-primary'
-                            : 'border-gray-300 text-gray-600 hover:border-primary'
-                        }`}
-                      >
-                        {type}
-                      </button>
-                    ))}
-                  </div>
-                </div>
-
-                {contentError && (
-                  <p className="text-sm text-orange-600 bg-orange-50 p-3 rounded-lg">{contentError}</p>
-                )}
-
-                {error && (
-                  <p className="text-sm text-red-600 bg-red-50 p-3 rounded-lg">{error}</p>
-                )}
-
-                <button
-                  type="submit"
-                  disabled={loading}
-                  className="w-full py-3 bg-primary text-white rounded-lg hover:bg-blue-600 transition-colors font-medium disabled:opacity-50"
-                >
-                  {loading ? t('auth.sending', 'Sending...') : t('auth.sendOtp', 'Send OTP')}
-                </button>
-              </form>
-            </>
-          )}
-
-          {step === 'otp' && (
-            <>
-              <h2 className="text-2xl font-bold text-gray-900 mb-2 text-center">{t('auth.verifyOtp', 'Verify OTP')}</h2>
-              <p className="text-gray-600 mb-6 text-center">{t('auth.enterCodeSent', 'Enter the code sent to {{phone}}.', { phone: phoneNumber })}</p>
-              
-              <form onSubmit={handleVerifyOtp} className="space-y-4">
-                <div>
-                  <label htmlFor="otp" className="block text-sm font-medium text-gray-700 mb-1">
-                    {t('auth.otpCode', 'OTP Code')}
-                  </label>
-                  <input
-                    id="otp"
-                    type="text"
-                    value={otp}
-                    onChange={(e) => setOtp(e.target.value)}
-                    placeholder="123456"
-                    maxLength={6}
-                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent outline-none text-center text-2xl tracking-widest"
-                  />
                 </div>
 
                 {error && (
@@ -356,44 +429,23 @@ function Login() {
                   disabled={loading}
                   className="w-full py-3 bg-primary text-white rounded-lg hover:bg-blue-600 transition-colors font-medium disabled:opacity-50"
                 >
-                  {loading ? t('auth.verifying', 'Verifying...') : t('auth.verify', 'Verify')}
-                </button>
-
-                <button
-                  type="button"
-                  onClick={() => setStep('phone')}
-                  className="w-full py-2 text-gray-600 hover:text-gray-900 transition-colors text-sm"
-                >
-                  {t('auth.changePhone', 'Change phone number')}
+                  {loading ? 'Creating account...' : 'Create Account'}
                 </button>
               </form>
-            </>
-          )}
 
-          {step === 'success' && (
-            <>
-              <div className="text-center">
-                <div className="w-16 h-16 mx-auto mb-4 bg-green-100 rounded-full flex items-center justify-center">
-                  <svg className="w-8 h-8 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-                  </svg>
-                </div>
-                <h2 className="text-2xl font-bold text-gray-900 mb-2">{t('auth.success', 'Success!')}</h2>
-                <p className="text-gray-600 mb-6">{t('auth.verifiedDesc', 'You have been verified successfully.')}</p>
-                <Link
-                  to="/quiz"
-                  className="inline-block w-full py-3 bg-primary text-white rounded-lg hover:bg-blue-600 transition-colors font-medium"
-                >
-                  {t('quiz.startQuiz', 'Take the Quiz')}
-                </Link>
-              </div>
+              <p className="text-center text-sm text-gray-600 mt-6">
+                Already have an account?{' '}
+                <button onClick={() => switchView('login')} className="text-primary hover:underline font-medium">
+                  Sign In
+                </button>
+              </p>
             </>
           )}
         </div>
 
         <p className="text-center text-sm text-gray-600 mt-6">
-          {t('auth.terms', 'By continuing, you agree to our')}{' '}
-          <a href="#" className="text-primary hover:underline">{t('auth.termsOfService', 'Terms of Service')}</a>
+          By continuing, you agree to our{' '}
+          <a href="/legal" className="text-primary hover:underline">Terms of Service</a>
         </p>
       </div>
     </div>

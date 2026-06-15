@@ -35,27 +35,64 @@ public class AuthController : ControllerBase
     [HttpPost("register")]
     public async Task<IActionResult> Register([FromBody] RegisterRequest request)
     {
-        if (string.IsNullOrWhiteSpace(request.Email) || string.IsNullOrWhiteSpace(request.Password) || string.IsNullOrWhiteSpace(request.FullName))
-            return BadRequest(new { message = "Email, password, and full name are required" });
+        var errors = new List<string>();
 
+        // --- Email validation ---
+        if (string.IsNullOrWhiteSpace(request.Email))
+            errors.Add("Email is required");
+        else
+        {
+            var emailRegex = @"^[^@\s]+@[^@\s]+\.[^@\s]+$";
+            if (!System.Text.RegularExpressions.Regex.IsMatch(request.Email, emailRegex))
+                errors.Add("Invalid email format");
+        }
+
+        // --- Password validation ---
+        if (string.IsNullOrWhiteSpace(request.Password))
+            errors.Add("Password is required");
+        else if (request.Password.Length < 6)
+            errors.Add("Password must be at least 6 characters");
+
+        // --- FullName validation ---
+        if (string.IsNullOrWhiteSpace(request.FullName))
+            errors.Add("Full name is required");
+
+        // --- BirthDate validation (mandatory) ---
+        if (request.BirthDate == null)
+            errors.Add("Birthdate is required");
+        else
+        {
+            var age = (DateTime.UtcNow - request.BirthDate.Value).Days / 365.25;
+            if (age < 18)
+                errors.Add("You must be at least 18 years old");
+            if (age > 120)
+                errors.Add("Invalid birthdate");
+        }
+
+        // --- Gender validation (mandatory) ---
+        if (string.IsNullOrWhiteSpace(request.Gender))
+            errors.Add("Gender is required");
+        else if (!new[] { "Male", "Female", "Other" }.Contains(request.Gender))
+            errors.Add("Gender must be Male, Female, or Other");
+
+        // --- Terms acceptance (mandatory) ---
         if (!request.TermsAccepted)
-            return BadRequest(new { message = "You must accept the terms and rules" });
+            errors.Add("You must accept the terms and rules");
 
-        // Validate email format
-        var emailRegex = @"^[^@\s]+@[^@\s]+\.[^@\s]+$";
-        if (!System.Text.RegularExpressions.Regex.IsMatch(request.Email, emailRegex))
-            return BadRequest(new { message = "Invalid email format" });
+        // --- Safety filter on name ---
+        if (!string.IsNullOrWhiteSpace(request.FullName))
+        {
+            if (!_safetyFilter.IsContentSafe(request.FullName))
+                errors.Add("Invalid content detected in your name");
+        }
 
-        // Validate password strength
-        if (request.Password.Length < 6)
-            return BadRequest(new { message = "Password must be at least 6 characters" });
+        if (errors.Any())
+            return BadRequest(new { message = "Validation failed", errors });
 
-        if (!_safetyFilter.IsContentSafe(request.FullName))
-            return BadRequest(new { message = "Invalid content detected in your name" });
-
-        var existingByEmail = await _context.Users.FirstOrDefaultAsync(u => u.Email == request.Email);
+        // --- Duplicate email check ---
+        var existingByEmail = await _context.Users.FirstOrDefaultAsync(u => u.Email == request.Email.ToLower().Trim());
         if (existingByEmail != null)
-            return Conflict(new { message = "Email already registered" });
+            return Conflict(new { message = "Email already registered", errors = new[] { "Email" } });
 
         var passwordHash = HashPassword(request.Password);
 
@@ -86,7 +123,7 @@ public class AuthController : ControllerBase
             FullName = _safetyFilter.FilterContent(request.FullName),
             BirthDate = request.BirthDate,
             Gender = request.Gender,
-            City = _safetyFilter.FilterContent(request.City),
+            City = string.IsNullOrWhiteSpace(request.City) ? "Unknown" : _safetyFilter.FilterContent(request.City),
             Latitude = request.Latitude,
             Longitude = request.Longitude,
             ProfilePhotoPath = photoPath,
@@ -114,8 +151,16 @@ public class AuthController : ControllerBase
     [HttpPost("login")]
     public async Task<IActionResult> Login([FromBody] LoginRequest request)
     {
-        if (string.IsNullOrWhiteSpace(request.Email) || string.IsNullOrWhiteSpace(request.Password))
-            return BadRequest(new { message = "Email and password are required" });
+        var errors = new List<string>();
+
+        if (string.IsNullOrWhiteSpace(request.Email))
+            errors.Add("Email is required");
+        
+        if (string.IsNullOrWhiteSpace(request.Password))
+            errors.Add("Password is required");
+
+        if (errors.Any())
+            return BadRequest(new { message = "Validation failed", errors });
 
         var user = await _context.Users.FirstOrDefaultAsync(u => u.Email == request.Email.ToLower().Trim());
 
@@ -174,7 +219,7 @@ public class AuthController : ControllerBase
 
     private string GenerateJwtToken(User user)
     {
-        var key = Encoding.UTF8.GetBytes(_configuration["Jwt:Key"] ?? "DefaultSecretKeyMustBe32Chars!");
+        var key = Encoding.UTF8.GetBytes(_configuration["Jwt:Key"] ?? "YourSuperSecretKeyMustBeAtLeast32CharactersLong!");
         var credentials = new SigningCredentials(new SymmetricSecurityKey(key), SecurityAlgorithms.HmacSha256);
 
         var claims = new[]
@@ -186,8 +231,8 @@ public class AuthController : ControllerBase
         };
 
         var token = new JwtSecurityToken(
-            issuer: _configuration["Jwt:Issuer"],
-            audience: _configuration["Jwt:Audience"],
+            issuer: _configuration["Jwt:Issuer"] ?? "MBTIMatch",
+            audience: _configuration["Jwt:Audience"] ?? "MBTIMatchUsers",
             claims: claims,
             expires: DateTime.UtcNow.AddHours(1),
             signingCredentials: credentials);

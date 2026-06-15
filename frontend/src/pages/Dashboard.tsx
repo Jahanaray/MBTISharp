@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react'
-import { Link } from 'react-router-dom'
+import { Link, useNavigate } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
 
 interface MatchData {
@@ -12,25 +12,53 @@ interface MatchData {
 
 function Dashboard() {
   const { t } = useTranslation()
+  const navigate = useNavigate()
   const [mbtiType, setMbtiType] = useState<string>('Not completed')
   const [match, setMatch] = useState<MatchData | null>(null)
   const [loading, setLoading] = useState(true)
   const [matching, setMatching] = useState(false)
-  const [userId] = useState(() => crypto.randomUUID())
+  const [userId, setUserId] = useState<string | null>(null)
 
   useEffect(() => {
-    fetchDashboardData()
-  }, [])
-
-  const fetchDashboardData = async () => {
+    // Get user from auth token
+    const token = localStorage.getItem('authToken')
+    if (!token) {
+      navigate('/login')
+      return
+    }
+    
+    // Decode JWT to get user ID (simple base64 decode of payload)
     try {
-      const resultRes = await fetch(`/api/quiz/result/${userId}`)
+      const payload = token.split('.')[1]
+      if (payload) {
+        const decoded = JSON.parse(atob(payload))
+        const uid = decoded.nameidentifier || decoded.sub || decoded.unique_name
+        if (uid) {
+          setUserId(uid)
+        }
+      }
+    } catch {
+      // Fallback: use stored userId
+      const stored = localStorage.getItem('userId')
+      if (stored) setUserId(stored)
+    }
+  }, [navigate])
+
+  useEffect(() => {
+    if (userId) {
+      fetchDashboardData(userId)
+    }
+  }, [userId])
+
+  const fetchDashboardData = async (uid: string) => {
+    try {
+      const resultRes = await fetch(`/api/quiz/result/${uid}`)
       if (resultRes.ok) {
         const resultData = await resultRes.json()
         setMbtiType(resultData.MBTIType || 'Not completed')
       }
 
-      const matchRes = await fetch(`/api/match/me/${userId}`)
+      const matchRes = await fetch(`/api/match/me/${uid}`)
       if (matchRes.ok) {
         const matchData = await matchRes.json()
         setMatch(matchData)
@@ -43,6 +71,7 @@ function Dashboard() {
   }
 
   const handleCreateMatch = async () => {
+    if (!userId) return
     setMatching(true)
     try {
       const response = await fetch('/api/match/create', {
@@ -63,7 +92,7 @@ function Dashboard() {
 
   const mbtiDescriptions: Record<string, string> = {
     'INTJ': t('result.intj', 'The Architect - Strategic and analytical'),
-    'INTP': t('result.infp', 'The Logician - Innovative and curious'),
+    'INTP': t('result.intp', 'The Logician - Innovative and curious'),
     'ENTJ': t('result.entj', 'The Commander - Bold and strategic'),
     'ENTP': t('result.entp', 'The Debater - Inventive and clever'),
     'INFJ': t('result.infj', 'The Advocate - Insightful and principled'),
@@ -94,7 +123,15 @@ function Dashboard() {
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-purple-50 py-12">
       <div className="container mx-auto px-4 max-w-4xl">
-        <h1 className="text-3xl font-bold text-gray-900 mb-8 text-center">{t('dashboard.title', 'Your Dashboard')}</h1>
+        <div className="flex justify-between items-center mb-8">
+          <h1 className="text-3xl font-bold text-gray-900">{t('dashboard.title', 'Your Dashboard')}</h1>
+          <button
+            onClick={() => { localStorage.removeItem('authToken'); navigate('/login') }}
+            className="px-4 py-2 text-sm text-gray-600 hover:text-gray-900 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors"
+          >
+            Logout
+          </button>
+        </div>
 
         {/* MBTI Result Card */}
         <div className="bg-white rounded-2xl shadow-lg p-8 mb-6">

@@ -1,12 +1,20 @@
 const API_BASE = '/api'
 
 export interface RegisterRequest {
-  phoneNumber: string
+  email: string
+  password: string
+  fullName: string
+  birthDate: string
+  gender: string
+  city: string
+  termsAccepted: boolean
+  allowChat: boolean
+  allowMeetInPerson: boolean
 }
 
-export interface VerifyRequest {
-  phoneNumber: string
-  otp: string
+export interface LoginRequest {
+  email: string
+  password: string
 }
 
 export interface AuthResponse {
@@ -16,22 +24,29 @@ export interface AuthResponse {
 }
 
 export const authApi = {
-  register: async (phoneNumber: string): Promise<void> => {
+  register: async (data: RegisterRequest): Promise<AuthResponse> => {
     const response = await fetch(`${API_BASE}/auth/register`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ phoneNumber })
+      body: JSON.stringify(data)
     })
-    if (!response.ok) throw new Error('Registration failed')
+    if (!response.ok) {
+      const error = await response.json().catch(() => ({ message: 'Registration failed' }))
+      throw new Error(error.message || 'Registration failed')
+    }
+    return response.json()
   },
 
-  verify: async (phoneNumber: string, otp: string): Promise<AuthResponse> => {
-    const response = await fetch(`${API_BASE}/auth/verify`, {
+  login: async (data: LoginRequest): Promise<AuthResponse> => {
+    const response = await fetch(`${API_BASE}/auth/login`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ phoneNumber, otp })
+      body: JSON.stringify(data)
     })
-    if (!response.ok) throw new Error('Verification failed')
+    if (!response.ok) {
+      const error = await response.json().catch(() => ({ message: 'Login failed' }))
+      throw new Error(error.message || 'Login failed')
+    }
     return response.json()
   },
 
@@ -41,5 +56,6 @@ export const authApi = {
 
   logout: (): void => {
     localStorage.removeItem('authToken')
+    localStorage.removeItem('userId')
   }
 }
