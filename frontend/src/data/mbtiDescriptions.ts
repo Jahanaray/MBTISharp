@@ -80,7 +80,7 @@ export const funnyMbtiDescriptions: Record<string, MbtiDescription> = {
     desc: 'Responsible, thorough, and dependable organizers who value tradition and loyalty.',
     funnyDesc: 'Has a color-coded calendar for their color-coded calendar. Will gently correct your grammar while secretly helping you move furniture. The friend who always shows up 10 minutes early.',
     traits: ['Responsible', 'Thorough', 'Dependable', 'Practical'],
-    funnyTraits: ['Rule Follower', 'Detail Nazi', 'Silent Hero', 'Fridge Organizer']
+    funnyTraits: ['Rule Follower', 'Detail Guardian', 'Silent Hero', 'Fridge Organizer']
   },
   ISFJ: {
     title: 'The Defender',

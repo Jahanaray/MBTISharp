@@ -19,8 +19,6 @@ function Quiz() {
   const [currentIndex, setCurrentIndex] = useState(0)
   const [answers, setAnswers] = useState<Record<number, string>>({})
   const [loading, setLoading] = useState(true)
-  const [submitted, setSubmitted] = useState(false)
-  const [result, setResult] = useState<{ MBTIType: string; Scores: Record<string, number> } | null>(null)
 
   // Get authenticated user ID from token
   const getUserId = (): string | null => {
@@ -31,7 +29,7 @@ function Quiz() {
       const payload = token.split('.')[1]
       if (payload) {
         const decoded = JSON.parse(atob(payload))
-        return decoded.nameidentifier || decoded.sub || decoded.unique_name
+        return decoded.userId || decoded.nameidentifier || decoded.sub || decoded.unique_name || decoded['http://schemas.xmlsoap.org/ws/2005/05/identity/claims/nameidentifier']
       }
     } catch {
       // Fallback to stored userId
@@ -75,14 +73,7 @@ function Quiz() {
     }
 
     const userIdStr = getUserId()
-    let userId: string
-    
-    // Try to parse as GUID, fallback to UUID
-    try {
-      userId = userIdStr ? (userIdStr.includes('-') ? userIdStr : JSON.parse(`"${userIdStr}"`).replace(/[0-9a-f]{8}-([0-9a-f]{4})-([0-9a-f]{4})-([0-9a-f]{4})-([0-9a-f]{12})/, '$1$2$3$4')) : crypto.randomUUID()
-    } catch {
-      userId = crypto.randomUUID()
-    }
+    const userId = userIdStr || ''
 
     const answersArray = Object.entries(answers).map(([questionId, selectedOption]) => ({
       questionId: parseInt(questionId),
@@ -98,9 +89,12 @@ function Quiz() {
 
       if (response.ok) {
         const data = await response.json()
-        setResult(data)
-        setSubmitted(true)
-        localStorage.setItem('quizResult', JSON.stringify(data))
+        const normalized = {
+          mbtiType: data.mbtiType || data.MBTIType,
+          scores: data.scores || data.Scores || {}
+        }
+        localStorage.setItem('quizResult', JSON.stringify(normalized))
+        navigate(`/result?type=${normalized.mbtiType}`)
       } else {
         const error = await response.json().catch(() => ({ message: 'Submission failed' }))
         alert(error.message || 'Submission failed')
@@ -118,43 +112,6 @@ function Quiz() {
         <div className="text-center">
           <div className="w-12 h-12 border-4 border-primary border-t-transparent rounded-full animate-spin mx-auto"></div>
           <p className="mt-4 text-gray-600">{t('quiz.loading', 'Loading questions...')}</p>
-        </div>
-      </div>
-    )
-  }
-
-  if (submitted && result) {
-    return (
-      <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-purple-50 py-16">
-        <div className="container mx-auto px-4 text-center">
-          <div className="max-w-2xl mx-auto bg-white rounded-2xl shadow-lg p-8">
-            <h2 className="text-3xl font-bold text-gray-900 mb-4">{t('result.title', 'Your Personality Type')}</h2>
-            <div className="text-6xl font-bold text-primary mb-6">{result.MBTIType}</div>
-            
-            <div className="grid grid-cols-2 gap-4 mb-8">
-              {Object.entries(result.Scores).map(([dimension, score]) => (
-                <div key={dimension} className="bg-gray-50 p-4 rounded-lg">
-                  <div className="text-sm text-gray-600">{dimension}</div>
-                  <div className="text-xl font-semibold text-gray-900">{score}</div>
-                </div>
-              ))}
-            </div>
-
-            <div className="flex flex-col sm:flex-row gap-4 justify-center">
-              <Link
-                to="/dashboard"
-                className="px-6 py-3 bg-primary text-white rounded-lg hover:bg-blue-600 transition-colors font-medium"
-              >
-                {t('result.goToDashboard', 'Go to Dashboard')}
-              </Link>
-              <Link
-                to="/quiz"
-                className="px-6 py-3 bg-white text-primary border-2 border-primary rounded-lg hover:bg-blue-50 transition-colors font-medium"
-              >
-                {t('result.retakeQuiz', 'Retake Quiz')}
-              </Link>
-            </div>
-          </div>
         </div>
       </div>
     )

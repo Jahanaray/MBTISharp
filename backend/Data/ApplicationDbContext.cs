@@ -21,8 +21,9 @@ public class ApplicationDbContext : DbContext
         {
             entity.HasKey(e => e.Id);
             entity.HasIndex(e => e.PhoneNumber).IsUnique();
-            entity.Property(e => e.PhoneNumber).IsRequired().HasMaxLength(20);
-            entity.Property(e => e.Email).HasMaxLength(100);
+            entity.HasIndex(e => e.Email).IsUnique();
+            entity.Property(e => e.PhoneNumber).HasMaxLength(20);
+            entity.Property(e => e.Email).IsRequired().HasMaxLength(100);
             entity.Property(e => e.PasswordHash).IsRequired().HasMaxLength(256);
             entity.Property(e => e.FullName).IsRequired().HasMaxLength(200);
             entity.Property(e => e.City).HasMaxLength(100);
@@ -88,5 +89,7 @@ public class ApplicationDbContext : DbContext
             entity.Property(e => e.Content).IsRequired().HasMaxLength(2000);
             entity.Property(e => e.SentAt).HasDefaultValueSql("NOW()");
         });
+
+        DbSeeder.SeedQuestions(modelBuilder);
     }
 }

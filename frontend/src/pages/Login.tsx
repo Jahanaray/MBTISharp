@@ -1,12 +1,10 @@
 import { useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
-import { useTranslation } from 'react-i18next'
 import { isContentSafe } from '../utils/safetyFilter'
 
 type View = 'login' | 'signup'
 
 function Login() {
-  const { t } = useTranslation()
   const navigate = useNavigate()
   const [view, setView] = useState<View>('login')
   
@@ -20,6 +18,7 @@ function Login() {
   const [birthDate, setBirthDate] = useState('')
   const [gender, setGender] = useState('')
   const [city, setCity] = useState('')
+  const [profilePhotoDataUrl, setProfilePhotoDataUrl] = useState('')
   const [termsAccepted, setTermsAccepted] = useState(false)
   const [allowChat, setAllowChat] = useState(true)
   const [allowMeetInPerson, setAllowMeetInPerson] = useState(false)
@@ -39,7 +38,34 @@ function Login() {
     setBirthDate('')
     setGender('')
     setCity('')
+    setProfilePhotoDataUrl('')
     setTermsAccepted(false)
+  }
+
+  const handlePhotoChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0]
+    if (!file) {
+      setProfilePhotoDataUrl('')
+      return
+    }
+
+    const allowedTypes = ['image/jpeg', 'image/png', 'image/webp']
+    if (!allowedTypes.includes(file.type) || file.size > 5 * 1024 * 1024) {
+      setValidationErrors(prev => ({ ...prev, profilePhoto: 'Use a JPG, PNG, or WebP image under 5MB' }))
+      event.target.value = ''
+      return
+    }
+
+    const reader = new FileReader()
+    reader.onload = () => {
+      setValidationErrors(prev => {
+        const next = { ...prev }
+        delete next.profilePhoto
+        return next
+      })
+      setProfilePhotoDataUrl(String(reader.result || ''))
+    }
+    reader.readAsDataURL(file)
   }
 
   const validateSignup = (): boolean => {
@@ -126,6 +152,7 @@ function Login() {
       if (response.ok) {
         const data = await response.json()
         localStorage.setItem('authToken', data.token)
+        localStorage.setItem('userId', data.userId)
         navigate('/dashboard')
       } else {
         const data = await response.json().catch(() => ({ message: 'Login failed' }))
@@ -156,6 +183,7 @@ function Login() {
           fullName: fullName.trim(),
           birthDate,
           gender,
+          profilePhotoDataUrl,
           city: city.trim() || 'Unknown',
           termsAccepted,
           allowChat,
@@ -168,12 +196,12 @@ function Login() {
       if (response.ok) {
         const data = await response.json()
         localStorage.setItem('authToken', data.token)
+        localStorage.setItem('userId', data.userId)
         navigate('/dashboard')
       } else {
         const data = await response.json().catch(() => ({ message: 'Registration failed' }))
         if (data.errors && Array.isArray(data.errors)) {
-          setValidationErrors(Object.fromEntries(data.errors.map((e: any) => [e.field || 'general', e.message])))
-          setError('Validation failed. Please check the form.')
+          setError(data.errors.join(' '))
         } else {
           const msg = data.message || 'Registration failed'
           if (msg.includes('already registered')) {
@@ -257,7 +285,7 @@ function Login() {
           ) : (
             <>
               <h2 className="text-2xl font-bold text-gray-900 mb-2 text-center">Create Account</h2>
-              <p className="text-gray-600 mb-6 text-center">All fields are required.</p>
+              <p className="text-gray-600 mb-6 text-center">Create your profile, then take the quiz whenever you are ready.</p>
               
               <form onSubmit={handleSignup} className="space-y-4">
                 <div>
@@ -362,16 +390,38 @@ function Login() {
                 </div>
 
                 <div>
+                  <label htmlFor="profile-photo" className="block text-sm font-medium text-gray-700 mb-1">
+                    Profile Photo
+                  </label>
+                  <div className="flex items-center gap-4">
+                    <div className="w-16 h-16 rounded-full bg-gray-100 border border-gray-200 overflow-hidden flex items-center justify-center text-gray-400 text-xs">
+                      {profilePhotoDataUrl ? (
+                        <img src={profilePhotoDataUrl} alt="Profile preview" className="w-full h-full object-cover" />
+                      ) : (
+                        'Photo'
+                      )}
+                    </div>
+                    <input
+                      id="profile-photo"
+                      type="file"
+                      accept="image/png,image/jpeg,image/webp"
+                      onChange={handlePhotoChange}
+                      className="block w-full text-sm text-gray-600 file:me-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:bg-blue-50 file:text-primary hover:file:bg-blue-100"
+                    />
+                  </div>
+                  {validationErrors.profilePhoto && <p className="text-xs text-red-600 mt-1">{validationErrors.profilePhoto}</p>}
+                </div>
+
+                <div>
                   <label htmlFor="city" className="block text-sm font-medium text-gray-700 mb-1">
-                    City *
+                    City
                   </label>
                   <input
                     id="city"
                     type="text"
                     value={city}
                     onChange={(e) => setCity(e.target.value)}
-                    placeholder="Your city"
-                    required
+                    placeholder="Optional"
                     className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent outline-none"
                   />
                 </div>

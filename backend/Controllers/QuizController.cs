@@ -25,32 +25,33 @@ public class QuizController : ControllerBase
         if (request.Answers == null || !request.Answers.Any())
             return BadRequest(new { message = "No answers provided" });
 
-        Guid userId;
-        try
+        var userId = Guid.TryParse(request.UserId, out var parsedUserId)
+            ? parsedUserId
+            : Guid.NewGuid();
+
+        var existingUser = await _context.Users.FindAsync(userId);
+
+        if (existingUser != null)
         {
-            userId = string.IsNullOrEmpty(request.UserId) ? Guid.NewGuid() : Guid.Parse(request.UserId);
+            var previousAnswers = _context.Answers.Where(a => a.UserId == userId);
+            _context.Answers.RemoveRange(previousAnswers);
+
+            var answers = request.Answers.Select(a => new Answer
+            {
+                Id = Guid.NewGuid(),
+                UserId = userId,
+                QuestionId = a.QuestionId,
+                SelectedOption = a.SelectedOption,
+                CreatedAt = DateTime.UtcNow
+            }).ToList();
+
+            _context.Answers.AddRange(answers);
+            await _context.SaveChangesAsync();
         }
-        catch
-        {
-            userId = Guid.Parse(request.UserId.Replace("-", "").Substring(0, 32).PadRight(32, '0'));
-        }
 
-        var answers = request.Answers.Select(a => new Answer
-        {
-            Id = Guid.NewGuid(),
-            UserId = userId,
-            QuestionId = a.QuestionId,
-            SelectedOption = a.SelectedOption,
-            CreatedAt = DateTime.UtcNow
-        }).ToList();
-
-        _context.Answers.AddRange(answers);
-        await _context.SaveChangesAsync();
-
-        var result = CalculateMBTI(userId);
+        var result = CalculateMBTI(request.Answers);
 
         // Save the MBTI type to the user's record if user exists
-        var existingUser = await _context.Users.FindAsync(userId);
         if (existingUser != null)
         {
             existingUser.MBTIType = result.MBTIType;
@@ -96,6 +97,18 @@ public class QuizController : ControllerBase
         if (!answers.Any())
             return new QuizResult { MBTIType = "Not completed", Scores = new Dictionary<string, int>() };
 
+        return CalculateMBTI(answers.Select(a => new SubmitAnswerRequest
+        {
+            QuestionId = a.QuestionId,
+            SelectedOption = a.SelectedOption
+        }).ToList());
+    }
+
+    private QuizResult CalculateMBTI(List<SubmitAnswerRequest> answers)
+    {
+        if (!answers.Any())
+            return new QuizResult { MBTIType = "Not completed", Scores = new Dictionary<string, int>() };
+
         var questions = _context.Questions.ToList();
 
         var scores = new Dictionary<string, int>
@@ -103,7 +116,7 @@ public class QuizController : ControllerBase
             { "E", 0 }, { "I", 0 },
             { "S", 0 }, { "N", 0 },
             { "T", 0 }, { "F", 0 },
-            { "C", 0 }, { "P", 0 }
+            { "J", 0 }, { "P", 0 }
         };
 
         foreach (var answer in answers)
@@ -113,7 +126,7 @@ public class QuizController : ControllerBase
             {
                 if (answer.SelectedOption == question.OptionA)
                     scores[question.Dimension.Substring(0, 1)] += question.WeightA;
-                else
+                else if (answer.SelectedOption == question.OptionB)
                     scores[question.Dimension.Substring(1, 1)] += question.WeightB;
             }
         }
@@ -123,7 +136,7 @@ public class QuizController : ControllerBase
             scores["E"] >= scores["I"] ? "E" : "I",
             scores["S"] >= scores["N"] ? "S" : "N",
             scores["T"] >= scores["F"] ? "T" : "F",
-            scores["C"] >= scores["P"] ? "C" : "P"
+            scores["J"] >= scores["P"] ? "J" : "P"
         };
 
         var result = new QuizResult

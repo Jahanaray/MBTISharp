@@ -5,36 +5,32 @@ namespace MBTIMatch.Data;
 
 public static class DbSeeder
 {
+    public static readonly List<Question> Questions = new()
+    {
+        new Question { Id = 1, Text = "After a long week, what recharges you faster?", Dimension = "EI", OptionA = "Meeting friends and talking it out", OptionB = "Quiet time with your own thoughts", WeightA = 1, WeightB = 1 },
+        new Question { Id = 2, Text = "In a group project, where do you naturally land?", Dimension = "EI", OptionA = "Starting the conversation and moving people along", OptionB = "Thinking deeply before adding your best idea", WeightA = 1, WeightB = 1 },
+        new Question { Id = 3, Text = "When your phone rings unexpectedly, your first instinct is:", Dimension = "EI", OptionA = "Answer and see what is happening", OptionB = "Let it ring, then text back", WeightA = 1, WeightB = 1 },
+        new Question { Id = 4, Text = "When learning something new, you prefer:", Dimension = "SN", OptionA = "Concrete examples and practical steps", OptionB = "Patterns, theories, and possibilities", WeightA = 1, WeightB = 1 },
+        new Question { Id = 5, Text = "Which compliment feels more like you?", Dimension = "SN", OptionA = "You notice every important detail", OptionB = "You see connections nobody else sees", WeightA = 1, WeightB = 1 },
+        new Question { Id = 6, Text = "Planning a trip, you focus first on:", Dimension = "SN", OptionA = "Budget, route, weather, and bookings", OptionB = "The vibe, hidden gems, and what it could become", WeightA = 1, WeightB = 1 },
+        new Question { Id = 7, Text = "When making a hard choice, you trust:", Dimension = "TF", OptionA = "Clear logic and fair principles", OptionB = "People's feelings and personal values", WeightA = 1, WeightB = 1 },
+        new Question { Id = 8, Text = "In an argument, you are more likely to:", Dimension = "TF", OptionA = "Point out what is inconsistent", OptionB = "Try to keep the relationship intact", WeightA = 1, WeightB = 1 },
+        new Question { Id = 9, Text = "A good decision should be:", Dimension = "TF", OptionA = "Objective, efficient, and honest", OptionB = "Kind, humane, and meaningful", WeightA = 1, WeightB = 1 },
+        new Question { Id = 10, Text = "Your ideal weekend has:", Dimension = "JP", OptionA = "A plan you can actually follow", OptionB = "Room for whatever sounds good later", WeightA = 1, WeightB = 1 },
+        new Question { Id = 11, Text = "Deadlines make you feel:", Dimension = "JP", OptionA = "Focused because the target is clear", OptionB = "Restricted because the options shrink", WeightA = 1, WeightB = 1 },
+        new Question { Id = 12, Text = "Your workspace is usually:", Dimension = "JP", OptionA = "Organized enough that things have a place", OptionB = "A creative ecosystem only you understand", WeightA = 1, WeightB = 1 },
+        new Question { Id = 13, Text = "When plans change suddenly, you usually:", Dimension = "JP", OptionA = "Need a minute to rebuild the plan", OptionB = "Adapt quickly and see what opens up", WeightA = 1, WeightB = 1 },
+        new Question { Id = 14, Text = "At a party where you know only one person, you:", Dimension = "EI", OptionA = "Find a circle and introduce yourself", OptionB = "Stick near familiar energy until you warm up", WeightA = 1, WeightB = 1 },
+        new Question { Id = 15, Text = "Your brain gets more excited by:", Dimension = "SN", OptionA = "What is proven and usable right now", OptionB = "What might be possible if the rules changed", WeightA = 1, WeightB = 1 },
+        new Question { Id = 16, Text = "If a friend asks for advice, you first offer:", Dimension = "TF", OptionA = "The cleanest solution", OptionB = "Emotional support and context", WeightA = 1, WeightB = 1 },
+        new Question { Id = 17, Text = "Your calendar is best described as:", Dimension = "JP", OptionA = "A promise to future you", OptionB = "A suggestion with ambition", WeightA = 1, WeightB = 1 },
+        new Question { Id = 18, Text = "In conversation, you enjoy:", Dimension = "EI", OptionA = "Thinking out loud with others", OptionB = "Polishing your thought before sharing", WeightA = 1, WeightB = 1 },
+        new Question { Id = 19, Text = "When solving problems, you start with:", Dimension = "SN", OptionA = "Known facts and constraints", OptionB = "The big picture and possible paths", WeightA = 1, WeightB = 1 },
+        new Question { Id = 20, Text = "Being honest means:", Dimension = "TF", OptionA = "Saying the truth directly", OptionB = "Saying the truth with care", WeightA = 1, WeightB = 1 }
+    };
+
     public static void SeedQuestions(ModelBuilder builder)
     {
-        var questions = new List<Question>
-        {
-            // EI Dimension (3 questions)
-            new Question { Id = 1, Text = "At a party, do you interact with many people or just a few?", Dimension = "EI", OptionA = "Interact with many", OptionB = "Interact with a few", WeightA = 1, WeightB = 0 },
-            new Question { Id = 2, Text = "Do you get energized by being around lots of people?", Dimension = "EI", OptionA = "Yes", OptionB = "No", WeightA = 1, WeightB = 0 },
-            new Question { Id = 3, Text = "Do you prefer to call ahead or send a last-minute text?", Dimension = "EI", OptionA = "Call ahead", OptionB = "Last-minute text", WeightA = 1, WeightB = 0 },
-
-            // SN Dimension (3 questions)
-            new Question { Id = 4, Text = "Are you more interested in what is actual or what is possible?", Dimension = "SN", OptionA = "What is actual", OptionB = "What is possible", WeightA = 1, WeightB = 0 },
-            new Question { Id = 5, Text = "In reading, do you prefer fact or fiction?", Dimension = "SN", OptionA = "Fact", OptionB = "Fiction", WeightA = 1, WeightB = 0 },
-            new Question { Id = 6, Text = "Do you see what is obvious or miss the obvious?", Dimension = "SN", OptionA = "See what is obvious", OptionB = "Miss the obvious", WeightA = 1, WeightB = 0 },
-
-            // TJ Dimension (3 questions)
-            new Question { Id = 7, Text = "Are you more comfortable making or taking decisions?", Dimension = "TJ", OptionA = "Making", OptionB = "Taking", WeightA = 1, WeightB = 0 },
-            new Question { Id = 8, Text = "Is it worse to have no principles or to be rigidly bound by them?", Dimension = "TJ", OptionA = "No principles", OptionB = "Rigidly bound", WeightA = 1, WeightB = 0 },
-            new Question { Id = 9, Text = "Are you more likely to let events occur or take control?", Dimension = "TJ", OptionA = "Take control", OptionB = "Let events occur", WeightA = 1, WeightB = 0 },
-
-            // CP Dimension (3 questions)
-            new Question { Id = 10, Text = "Do you prefer to work with a deadline or spontaneously?", Dimension = "CP", OptionA = "With a deadline", OptionB = "Spontaneously", WeightA = 1, WeightB = 0 },
-            new Question { Id = 11, Text = "Do you tend to look for facts first or impressions second?", Dimension = "CP", OptionA = "Facts first", OptionB = "Impressions first", WeightA = 1, WeightB = 0 },
-            new Question { Id = 12, Text = "Are you more drawn to convincing or touching?", Dimension = "CP", OptionA = "Touching", OptionB = "Convincing", WeightA = 1, WeightB = 0 },
-
-            // Cross-dimensional (3 questions)
-            new Question { Id = 13, Text = "Do you prefer a planned daily routine or an unplanned one?", Dimension = "CP", OptionA = "Planned", OptionB = "Unplanned", WeightA = 1, WeightB = 0 },
-            new Question { Id = 14, Text = "Are you more comfortable with working alone or in a group?", Dimension = "EI", OptionA = "In a group", OptionB = "Alone", WeightA = 1, WeightB = 0 },
-            new Question { Id = 15, Text = "Do you value truth more than tact?", Dimension = "TJ", OptionA = "Truth", OptionB = "Tact", WeightA = 1, WeightB = 0 }
-        };
-
-        builder.Entity<Question>().HasData(questions);
+        builder.Entity<Question>().HasData(Questions);
     }
 }

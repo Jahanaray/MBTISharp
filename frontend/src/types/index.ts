@@ -1,6 +1,12 @@
 // Auth types
 export interface RegisterRequest {
-  phoneNumber: string
+  email: string
+  password: string
+  fullName: string
+  birthDate: string
+  gender: string
+  profilePhotoDataUrl?: string
+  city?: string
 }
 
 export interface VerifyOtpRequest {
@@ -12,6 +18,7 @@ export interface AuthResponse {
   token: string
   refreshToken: string
   expiresAt: string
+  userId: string
 }
 
 // Quiz types
@@ -36,8 +43,8 @@ export interface SubmitQuizRequest {
 }
 
 export interface QuizResult {
-  MBTIType: string
-  Scores: Record<string, number>
+  mbtiType: string
+  scores: Record<string, number>
 }
 
 // Match types
@@ -87,7 +94,9 @@ export interface MessageResponse {
 // User types
 export interface User {
   id: string
-  phoneNumber: string
+  email: string
+  fullName: string
+  phoneNumber?: string
   phoneVerified: boolean
   mbtiType: string | null
   createdAt: string

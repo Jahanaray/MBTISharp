@@ -4,8 +4,8 @@ import { useTranslation } from 'react-i18next'
 import { funnyMbtiDescriptions } from '../data/mbtiDescriptions'
 
 interface QuizResult {
-  MBTIType: string
-  Scores: Record<string, number>
+  mbtiType: string
+  scores: Record<string, number>
 }
 
 const TYPE_TITLES: Record<string, string> = {
@@ -23,19 +23,26 @@ function Result() {
   const [showFunny, setShowFunny] = useState(false)
 
   useEffect(() => {
+    const savedResult = localStorage.getItem('quizResult')
+    const parsedSaved = savedResult ? JSON.parse(savedResult) : null
     const mbtiType = searchParams.get('type')
     if (mbtiType) {
+      const savedType = String(parsedSaved?.mbtiType || parsedSaved?.MBTIType || '').toUpperCase()
+      const normalizedType = mbtiType.toUpperCase()
       setResult({
-        MBTIType: mbtiType,
-        Scores: { E: 8, I: 7, S: 6, N: 9, T: 7, F: 8, C: 5, P: 10 }
+        mbtiType: normalizedType,
+        scores: savedType === normalizedType ? (parsedSaved.scores || parsedSaved.Scores || {}) : { E: 8, I: 7, S: 6, N: 9, T: 7, F: 8, J: 5, P: 10 }
       })
       setLoading(false)
       return
     }
 
-    const savedResult = localStorage.getItem('quizResult')
-    if (savedResult) {
-      setResult(JSON.parse(savedResult))
+    if (parsedSaved) {
+      const parsed = parsedSaved
+      setResult({
+        mbtiType: parsed.mbtiType || parsed.MBTIType,
+        scores: parsed.scores || parsed.Scores || {}
+      })
     }
     setLoading(false)
   }, [searchParams])
@@ -67,7 +74,8 @@ function Result() {
     )
   }
 
-  const typeKey = result.MBTIType.toLowerCase()
+  const mbtiType = result.mbtiType.toUpperCase()
+  const typeKey = mbtiType.toLowerCase()
   const dimensionLabels: Record<string, { en: string; fa: string }> = {
     intj: { en: 'Strategic, analytical, and independent', fa: 'استراتژیک، تحلیلی و مستقل' },
     intp: { en: 'Innovative, curious, and logical', fa: 'نوآور، کنجکاو و منطقی' },
@@ -111,10 +119,10 @@ function Result() {
     : (dimensionLabels[typeKey]?.en || ''))
 
   const dimensionNames = [
-    { label: t('result.energy', 'Energy'), a: t('result.extraversion', 'Extraversion'), b: t('result.introversion', 'Introversion'), scoreA: result.Scores.E || 0, scoreB: result.Scores.I || 0 },
-    { label: t('result.sensing', 'Sensing'), a: t('result.sensingLabel', 'Sensing'), b: t('result.intuition', 'Intuition'), scoreA: result.Scores.S || 0, scoreB: result.Scores.N || 0 },
-    { label: t('result.thinking', 'Thinking'), a: t('result.thinkingLabel', 'Thinking'), b: t('result.feeling', 'Feeling'), scoreA: result.Scores.T || 0, scoreB: result.Scores.F || 0 },
-    { label: t('result.lifestyle', 'Lifestyle'), a: t('result.judging', 'Judging'), b: t('result.perceiving', 'Perceiving'), scoreA: result.Scores.C || 0, scoreB: result.Scores.P || 0 }
+    { label: t('result.energy', 'Energy'), a: t('result.extraversion', 'Extraversion'), b: t('result.introversion', 'Introversion'), scoreA: result.scores.E || 0, scoreB: result.scores.I || 0 },
+    { label: t('result.sensing', 'Sensing'), a: t('result.sensingLabel', 'Sensing'), b: t('result.intuition', 'Intuition'), scoreA: result.scores.S || 0, scoreB: result.scores.N || 0 },
+    { label: t('result.thinking', 'Thinking'), a: t('result.thinkingLabel', 'Thinking'), b: t('result.feeling', 'Feeling'), scoreA: result.scores.T || 0, scoreB: result.scores.F || 0 },
+    { label: t('result.lifestyle', 'Lifestyle'), a: t('result.judging', 'Judging'), b: t('result.perceiving', 'Perceiving'), scoreA: result.scores.J || 0, scoreB: result.scores.P || 0 }
   ]
 
   const currentTraits = traits[typeKey as keyof typeof traits] || []
@@ -125,18 +133,18 @@ function Result() {
         {/* Result Card */}
         <div className="bg-white rounded-2xl shadow-lg p-8 mb-6 text-center">
           <h2 className="text-xl font-semibold text-gray-700 mb-2">{t('result.yourType', 'Your Personality Type')}</h2>
-          <div className="text-7xl font-bold text-primary mb-3">{result.MBTIType}</div>
+          <div className="text-7xl font-bold text-primary mb-3">{mbtiType}</div>
           <h3 className="text-2xl font-medium text-gray-900 mb-3">
-            {t(TYPE_TITLES[result.MBTIType] || 'result.yourType', result.MBTIType)}
+            {t(TYPE_TITLES[mbtiType] || 'result.yourType', mbtiType)}
           </h3>
           <p className="text-gray-600 max-w-lg mx-auto mb-6">{desc}</p>
           
           {/* Funny Toggle */}
           {(() => {
-            const descData = funnyMbtiDescriptions[result.MBTIType]
+            const descData = funnyMbtiDescriptions[mbtiType]
             if (!descData) return null
-            const funnyTitle = t(`result.funnyTypeTitles.${result.MBTIType}`, descData.funnyTitle)
-            const funnyDesc = t(`result.funnyTypeDescs.${result.MBTIType}`, descData.funnyDesc)
+            const funnyTitle = t(`result.funnyTypeTitles.${mbtiType}`, descData.funnyTitle)
+            const funnyDesc = t(`result.funnyTypeDescs.${mbtiType}`, descData.funnyDesc)
             const funnyTraits = descData.funnyTraits
             return (
               <>
@@ -144,7 +152,7 @@ function Result() {
                   onClick={() => setShowFunny(!showFunny)}
                   className="text-sm text-purple-600 hover:text-purple-700 underline mb-4 inline-block"
                 >
-                  {showFunny ? t('result.showSerious', 'Show serious description') : t('result.showFunny', 'Show funny description 🎭')}
+                  {showFunny ? t('result.showSerious', 'Show serious description') : t('result.showFunny', 'Show funny description')}
                 </button>
                 {showFunny && (
                   <>
@@ -153,7 +161,7 @@ function Result() {
                     <div className="flex flex-wrap justify-center gap-2 mb-6">
                       {funnyTraits.map((trait, i) => (
                         <span key={i} className="px-4 py-2 bg-purple-50 text-purple-700 rounded-full text-sm font-medium">
-                          {t(`result.funnyTraits.${result.MBTIType}.${i}`, trait)}
+                          {t(`result.funnyTraits.${mbtiType}.${i}`, trait)}
                         </span>
                       ))}
                     </div>

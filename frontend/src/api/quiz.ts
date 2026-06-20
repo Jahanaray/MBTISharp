@@ -21,8 +21,8 @@ export interface SubmitQuizRequest {
 }
 
 export interface QuizResult {
-  MBTIType: string
-  Scores: Record<string, number>
+  mbtiType: string
+  scores: Record<string, number>
 }
 
 export const quizApi = {
@@ -42,7 +42,7 @@ export const quizApi = {
     return response.json()
   },
 
-  getResult: async (userId: string): Promise<{ MBTIType: string }> => {
+  getResult: async (userId: string): Promise<{ mbtiType: string }> => {
     const response = await fetch(`${API_BASE}/quiz/result/${userId}`)
     if (!response.ok) throw new Error('Failed to fetch result')
     return response.json()

@@ -7,6 +7,7 @@ public class RegisterRequest
     public string FullName { get; set; } = string.Empty;
     public DateTime? BirthDate { get; set; }
     public string Gender { get; set; } = string.Empty; // Male, Female, Other
+    public string? ProfilePhotoDataUrl { get; set; }
     public string City { get; set; } = string.Empty;
     public decimal? Latitude { get; set; }
     public decimal? Longitude { get; set; }
@@ -28,6 +29,7 @@ public class AuthResponse
     public string Token { get; set; } = string.Empty;
     public string RefreshToken { get; set; } = string.Empty;
     public DateTime ExpiresAt { get; set; }
+    public Guid UserId { get; set; }
 }
 
 public class UserProfileResponse

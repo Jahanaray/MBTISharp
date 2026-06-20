@@ -1,5 +1,6 @@
 import { Link } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
+import { funnyMbtiDescriptions } from '../data/mbtiDescriptions'
 
 function Home() {
   const { t } = useTranslation()
@@ -70,6 +71,34 @@ function Home() {
                 {t('home.step3Desc', 'Discover compatible personalities and build meaningful relationships.')}
               </p>
             </div>
+          </div>
+        </div>
+      </div>
+
+      {/* Types Section */}
+      <div className="bg-slate-950 py-16 text-white">
+        <div className="container mx-auto px-4">
+          <div className="max-w-3xl mx-auto text-center mb-10">
+            <h2 className="text-3xl font-bold mb-3">Explore the 16 Types</h2>
+            <p className="text-slate-300">
+              A quick preview of every personality style before you jump into the quiz.
+            </p>
+          </div>
+          <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-4 max-w-6xl mx-auto">
+            {Object.entries(funnyMbtiDescriptions).map(([type, info]) => (
+              <Link
+                key={type}
+                to={`/result?type=${type}`}
+                className="group rounded-lg border border-white/10 bg-white/[0.06] p-5 text-left hover:bg-white/[0.1] hover:border-cyan-300/50 transition-colors"
+              >
+                <div className="flex items-center justify-between gap-3 mb-3">
+                  <span className="text-2xl font-bold text-cyan-200">{type}</span>
+                  <span className="text-xs uppercase tracking-wide text-slate-400 group-hover:text-cyan-200">View</span>
+                </div>
+                <h3 className="font-semibold text-white mb-2">{info.title}</h3>
+                <p className="text-sm text-slate-300 line-clamp-3">{info.desc}</p>
+              </Link>
+            ))}
           </div>
         </div>
       </div>

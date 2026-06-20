@@ -96,22 +96,10 @@ public class AuthController : ControllerBase
 
         var passwordHash = HashPassword(request.Password);
 
-        string? photoPath = null;
-        var photoFile = Request.Form.Files.FirstOrDefault(f => f.Name == "photo");
-        if (photoFile != null && photoFile.Length > 0)
+        var photoPath = await SaveProfilePhotoAsync(request.ProfilePhotoDataUrl);
+        if (photoPath == "invalid")
         {
-            var allowedTypes = new[] { "image/jpeg", "image/png", "image/jpg", "image/webp" };
-            if (!allowedTypes.Contains(photoFile.ContentType))
-                return BadRequest(new { message = "Only JPEG, PNG, and WebP images are allowed" });
-
-            if (photoFile.Length > 5 * 1024 * 1024)
-                return BadRequest(new { message = "Photo size must be less than 5MB" });
-
-            var fileName = $"{Guid.NewGuid()}{Path.GetExtension(photoFile.FileName)}";
-            photoPath = Path.Combine(_uploadFolder, fileName);
-            
-            using var stream = new FileStream(photoPath, FileMode.Create);
-            await photoFile.CopyToAsync(stream);
+            return BadRequest(new { message = "Only JPEG, PNG, and WebP images under 5MB are allowed" });
         }
 
         var user = new User
@@ -144,7 +132,8 @@ public class AuthController : ControllerBase
         {
             Token = GenerateJwtToken(user),
             RefreshToken = GenerateRefreshToken(),
-            ExpiresAt = DateTime.UtcNow.AddHours(1)
+            ExpiresAt = DateTime.UtcNow.AddHours(1),
+            UserId = user.Id
         });
     }
 
@@ -173,7 +162,8 @@ public class AuthController : ControllerBase
         {
             Token = token,
             RefreshToken = GenerateRefreshToken(),
-            ExpiresAt = DateTime.UtcNow.AddHours(1)
+            ExpiresAt = DateTime.UtcNow.AddHours(1),
+            UserId = user.Id
         });
     }
 
@@ -225,6 +215,7 @@ public class AuthController : ControllerBase
         var claims = new[]
         {
             new Claim(ClaimTypes.NameIdentifier, user.Id.ToString()),
+            new Claim("userId", user.Id.ToString()),
             new Claim(ClaimTypes.Email, user.Email),
             new Claim(ClaimTypes.Name, user.FullName),
             new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString())
@@ -243,5 +234,45 @@ public class AuthController : ControllerBase
     private string GenerateRefreshToken()
     {
         return Convert.ToBase64String(Guid.NewGuid().ToByteArray());
+    }
+
+    private async Task<string?> SaveProfilePhotoAsync(string? dataUrl)
+    {
+        if (string.IsNullOrWhiteSpace(dataUrl))
+            return null;
+
+        var commaIndex = dataUrl.IndexOf(',');
+        if (!dataUrl.StartsWith("data:image/", StringComparison.OrdinalIgnoreCase) || commaIndex < 0)
+            return "invalid";
+
+        var header = dataUrl[..commaIndex].ToLowerInvariant();
+        var extension = header switch
+        {
+            var h when h.Contains("image/jpeg") || h.Contains("image/jpg") => ".jpg",
+            var h when h.Contains("image/png") => ".png",
+            var h when h.Contains("image/webp") => ".webp",
+            _ => string.Empty
+        };
+
+        if (string.IsNullOrEmpty(extension))
+            return "invalid";
+
+        byte[] bytes;
+        try
+        {
+            bytes = Convert.FromBase64String(dataUrl[(commaIndex + 1)..]);
+        }
+        catch
+        {
+            return "invalid";
+        }
+
+        if (bytes.Length > 5 * 1024 * 1024)
+            return "invalid";
+
+        var fileName = $"{Guid.NewGuid()}{extension}";
+        var photoPath = Path.Combine(_uploadFolder, fileName);
+        await System.IO.File.WriteAllBytesAsync(photoPath, bytes);
+        return photoPath;
     }
 }

@@ -6,6 +6,7 @@ export interface RegisterRequest {
   fullName: string
   birthDate: string
   gender: string
+  profilePhotoDataUrl?: string
   city: string
   termsAccepted: boolean
   allowChat: boolean
@@ -21,6 +22,7 @@ export interface AuthResponse {
   token: string
   refreshToken: string
   expiresAt: string
+  userId: string
 }
 
 export const authApi = {

@@ -32,7 +32,7 @@ function Dashboard() {
       const payload = token.split('.')[1]
       if (payload) {
         const decoded = JSON.parse(atob(payload))
-        const uid = decoded.nameidentifier || decoded.sub || decoded.unique_name
+        const uid = decoded.userId || decoded.nameidentifier || decoded.sub || decoded.unique_name || decoded['http://schemas.xmlsoap.org/ws/2005/05/identity/claims/nameidentifier']
         if (uid) {
           setUserId(uid)
         }
@@ -55,7 +55,7 @@ function Dashboard() {
       const resultRes = await fetch(`/api/quiz/result/${uid}`)
       if (resultRes.ok) {
         const resultData = await resultRes.json()
-        setMbtiType(resultData.MBTIType || 'Not completed')
+        setMbtiType(resultData.mbtiType || resultData.MBTIType || 'Not completed')
       }
 
       const matchRes = await fetch(`/api/match/me/${uid}`)
